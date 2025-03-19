@@ -9,7 +9,8 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: 'Silencerer',
-  description: 'Free and Open-Source Audio Silence Detection and Removal',
+  description:
+    'Free and Open-Source Audio & Video Silence Detection and Removal',
 };
 
 export default function RootLayout({

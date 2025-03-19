@@ -13,7 +13,7 @@ export default function AudioPlayer() {
   const markers = useAudioTimeBlocks(exampleDuration);
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col pb-2">
       <div className="w-full h-16 flex items-center justify-between px-4">
         <div className="flex items-center">
           <button
@@ -59,6 +59,10 @@ export default function AudioPlayer() {
       {/* Audio Visualizer */}
       <div className="w-full mt-4 h-32 relative flex flex-col px-4">
         {/* Playhead */}
+        <div className="absolute top-0 left-1/2 h-full flex flex-col items-center cursor-pointer">
+          <div className="w-0 h-0 border-l-[10px] translate-y-2 border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-t-blue-500"></div>
+          <div className="w-0.5 grow bg-blue-500"></div>
+        </div>
         {/* Time Markers */}
         <div className="flex gap-x-4 justify-between items-center">
           {markers.map((marker, index) => {

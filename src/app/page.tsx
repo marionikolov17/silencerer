@@ -1,5 +1,6 @@
 import AddedMedia from '@/components/AddedMedia';
 import Header from '@/components/Header';
+import VideoPreview from '@/components/VideoPreview';
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
         <AddedMedia />
         <div className="grow flex flex-col">
           <Header />
+          <VideoPreview />
         </div>
       </div>
     </main>

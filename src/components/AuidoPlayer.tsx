@@ -1,0 +1,81 @@
+'use client';
+
+import { AiFillBackward, AiFillForward } from 'react-icons/ai';
+import { CiZoomIn, CiZoomOut } from 'react-icons/ci';
+import { IoCutOutline, IoPlay } from 'react-icons/io5';
+
+export default function AudioPlayer() {
+  return (
+    <div className="w-full flex flex-col">
+      <div className="w-full h-16 flex items-center justify-between px-4">
+        <div className="flex items-center">
+          <button
+            title="Silence Remove"
+            className="flex items-center py-2 px-4 cursor-pointer hover:bg-gray-100 rounded-lg"
+          >
+            <IoCutOutline className="text-2xl" />
+            <p className="ms-2 text-base">Silence Remove</p>
+          </button>
+        </div>
+        {/* Audio Controls */}
+        <div className="grow flex items-center justify-center gap-x-2">
+          <button
+            title="Backward"
+            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
+          >
+            <AiFillBackward className="text-xl" />
+          </button>
+          <button
+            title="Play"
+            className="p-3 mx-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
+          >
+            <IoPlay className="text-2xl" />
+          </button>
+          <button
+            title="Forward"
+            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
+          >
+            <AiFillForward className="text-xl" />
+          </button>
+          <p className="ms-2 text-gray-500">00:00:00 / 01:00:00</p>
+        </div>
+        <div className="flex items-center">
+          <ZoomController />
+          <button
+            title="Zoom 100%"
+            className="ms-4 py-2 px-4 rounded-full hover:bg-gray-100 cursor-pointer"
+          >
+            Fit to screen
+          </button>
+        </div>
+      </div>
+      {/* Audio Visualizer */}
+      <div className="w-full h-32"></div>
+    </div>
+  );
+}
+
+function ZoomController() {
+  return (
+    <div className="flex items-center gap-x-4">
+      <button
+        title="Zoom In"
+        className="rounded-full flex items-center justify-center cursor-pointer hover:text-blue-500"
+      >
+        <CiZoomIn className="text-2xl" />
+      </button>
+      <div className="w-40 h-full relative flex items-center">
+        <div className="w-full h-0.5 bg-gray-200">
+          <div className="w-1/2 h-full bg-blue-500"></div>
+        </div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-4 h-4 border-3 border-blue-500 bg-white cursor-pointer"></div>
+      </div>
+      <button
+        title="Zoom Out"
+        className="rounded-full flex items-center justify-center cursor-pointer hover:text-blue-500"
+      >
+        <CiZoomOut className="text-2xl" />
+      </button>
+    </div>
+  );
+}

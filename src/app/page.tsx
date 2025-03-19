@@ -1,6 +1,7 @@
 import AddedMedia from '@/components/AddedMedia';
 import Header from '@/components/Header';
 import VideoPreview from '@/components/VideoPreview';
+import AudioPlayer from '@/components/AuidoPlayer';
 
 export default function Home() {
   return (
@@ -11,6 +12,9 @@ export default function Home() {
           <Header />
           <VideoPreview />
         </div>
+      </div>
+      <div className="w-full grow flex flex-col justify-end">
+        <AudioPlayer />
       </div>
     </main>
   );

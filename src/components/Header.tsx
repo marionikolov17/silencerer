@@ -22,13 +22,13 @@ export default function Header() {
       </div>
       <div className="flex items-center gap-x-2">
         <button
-          className="bg-orange-500 text-white px-8 py-2 rounded-lg cursor-pointer hover:bg-orange-600 transition-all duration-300"
+          className="bg-orange-500 text-white text-sm px-8 py-2 rounded-lg cursor-pointer hover:bg-orange-600 transition-all duration-300"
           title="Export Media"
         >
           Export
         </button>
         <button
-          className="bg-blue-500 text-white px-8 py-2 rounded-lg cursor-pointer hover:bg-blue-600 transition-all duration-300 disabled:bg-blue-300 disabled:cursor-not-allowed disabled:hover:bg-blue-300"
+          className="bg-blue-500 text-white text-sm px-8 py-2 rounded-lg cursor-pointer hover:bg-blue-600 transition-all duration-300 disabled:bg-blue-300 disabled:cursor-not-allowed disabled:hover:bg-blue-300"
           title="Save Project (disabled)"
           disabled
         >

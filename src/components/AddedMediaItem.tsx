@@ -7,8 +7,8 @@ import { FiEdit2 } from 'react-icons/fi';
 import { PiFileAudioLight, PiTrashBold } from 'react-icons/pi';
 
 export default function AddedMediaItem({ name }: { name: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useHandleClickOutside(containerRef, () => setIsMenuOpen(false));
 

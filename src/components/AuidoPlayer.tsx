@@ -3,8 +3,15 @@
 import { AiFillBackward, AiFillForward } from 'react-icons/ai';
 import { CiZoomIn, CiZoomOut } from 'react-icons/ci';
 import { IoCutOutline, IoPlay } from 'react-icons/io5';
+import useAudioTimeBlocks, {
+  AudioTimeBlockType,
+} from '@/hooks/useAudioTimeBlocks';
 
 export default function AudioPlayer() {
+  const exampleDuration = 60;
+
+  const markers = useAudioTimeBlocks(exampleDuration);
+
   return (
     <div className="w-full flex flex-col">
       <div className="w-full h-16 flex items-center justify-between px-4">
@@ -50,7 +57,31 @@ export default function AudioPlayer() {
         </div>
       </div>
       {/* Audio Visualizer */}
-      <div className="w-full h-32"></div>
+      <div className="w-full mt-4 h-32 relative flex flex-col px-4">
+        {/* Playhead */}
+        {/* Time Markers */}
+        <div className="flex gap-x-4 justify-between items-center">
+          {markers.map((marker, index) => {
+            if (marker.type === AudioTimeBlockType.MAJOR) {
+              return (
+                <span key={index} className="text-gray-500">
+                  {marker.label}
+                </span>
+              );
+            } else {
+              return (
+                <div
+                  key={index}
+                  className="w-1 h-1 rounded-full bg-gray-200"
+                ></div>
+              );
+            }
+          })}
+        </div>
+        <div className="w-full h-[1px] bg-gray-200"></div>
+        {/* Waveform and Blocks */}
+        <div className="w-full grow"></div>
+      </div>
     </div>
   );
 }

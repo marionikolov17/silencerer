@@ -13,7 +13,7 @@ export default function AudioPlayer() {
   const markers = useAudioTimeBlocks(exampleDuration);
 
   return (
-    <div className="w-full flex flex-col pb-2">
+    <div className="w-full flex flex-col pb-2 z-50 bg-white">
       <div className="w-full h-16 flex items-center justify-between px-4">
         <div className="flex items-center">
           <button
@@ -21,7 +21,7 @@ export default function AudioPlayer() {
             className="flex items-center py-2 px-4 cursor-pointer hover:bg-gray-100 rounded-lg"
           >
             <IoCutOutline className="text-2xl" />
-            <p className="ms-2 text-base">Silence Remove</p>
+            <p className="ms-2 text-base hidden sm:flex">Silence Remove</p>
           </button>
         </div>
         {/* Audio Controls */}
@@ -30,23 +30,25 @@ export default function AudioPlayer() {
             title="Backward"
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
           >
-            <AiFillBackward className="text-xl" />
+            <AiFillBackward className="text-lg sm:text-xl" />
           </button>
           <button
             title="Play"
             className="p-3 mx-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
           >
-            <IoPlay className="text-2xl" />
+            <IoPlay className="text-xl sm:text-2xl" />
           </button>
           <button
             title="Forward"
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
           >
-            <AiFillForward className="text-xl" />
+            <AiFillForward className="text-lg sm:text-xl" />
           </button>
-          <p className="ms-2 text-gray-500">00:00:00 / 01:00:00</p>
+          <p className="text-sm sm:text-base ms-2 text-gray-500">
+            00:00:00 / 01:00:00
+          </p>
         </div>
-        <div className="flex items-center">
+        <div className="hidden lg:flex items-center">
           <ZoomController />
           <button
             title="Zoom 100%"
@@ -57,14 +59,14 @@ export default function AudioPlayer() {
         </div>
       </div>
       {/* Audio Visualizer */}
-      <div className="w-full mt-4 h-32 relative flex flex-col px-4">
+      <div className="w-full mt-4 h-32 relative flex flex-col px-4 overflow-x-auto">
         {/* Playhead */}
         <div className="absolute top-0 left-1/2 h-full flex flex-col items-center cursor-pointer">
           <div className="w-0 h-0 border-l-[10px] translate-y-2 border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-t-blue-500"></div>
           <div className="w-0.5 grow bg-blue-500"></div>
         </div>
         {/* Time Markers */}
-        <div className="flex gap-x-4 justify-between items-center">
+        <div className="flex gap-x-4 justify-between items-center w-max sm:w-full border-b border-gray-200">
           {markers.map((marker, index) => {
             if (marker.type === AudioTimeBlockType.MAJOR) {
               return (
@@ -82,7 +84,6 @@ export default function AudioPlayer() {
             }
           })}
         </div>
-        <div className="w-full h-[1px] bg-gray-200"></div>
         {/* Waveform and Blocks */}
         <div className="w-full grow"></div>
       </div>

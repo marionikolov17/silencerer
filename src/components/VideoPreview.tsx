@@ -1,13 +1,18 @@
 'use client';
 
+import { Dispatch, SetStateAction } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
 
-export default function VideoPreview() {
+interface InputProps {
+  setIsMobileMediaOpened: Dispatch<SetStateAction<boolean>>;
+}
+
+export default function VideoPreview({ setIsMobileMediaOpened }: InputProps) {
   return (
     <div className="w-full grow flex flex-col items-center overflow-hidden">
       <div className="w-full grow flex items-center justify-center py-8 px-8 overflow-hidden">
         {/* Place Video here */}
-        <div className="bg-black w-[800px] h-[450px]"></div>
+        <div className="bg-black w-full min-h-[250px] sm:w-[600px] sm:h-[338px] 2xl:w-[800px] 2xl:h-[450px]"></div>
       </div>
       <div className="w-full py-8 flex items-center justify-center">
         <div className="h-12 bg-white rounded-lg flex items-center gap-x-4 px-4 overflow-hidden">
@@ -21,30 +26,14 @@ export default function VideoPreview() {
           </button>
         </div>
       </div>
+      <div className="w-full flex lg:hidden items-center justify-center pb-8">
+        <button
+          className="text-sm"
+          onClick={() => setIsMobileMediaOpened(true)}
+        >
+          Change Media
+        </button>
+      </div>
     </div>
   );
 }
-
-/* function SignalVisualizer() {
-    return (
-        <div className="flex h-80">
-            <div className="w-10 flex flex-col">
-                <div className="w-full h-6"></div>
-            </div>
-            <div className="w-24 h-full border border-gray-300 rounded-lg flex flex-col">
-                <div className="w-full flex h-6 border-b border-gray-300">
-                    <div className="grow w-1/2 flex items-center justify-center border-r border-gray-300">
-                        <p>L</p>
-                    </div>
-                    <div className="grow w-1/2 flex items-center justify-center">
-                        <p>R</p>
-                    </div>
-                </div>
-                <div className="w-full grow flex">
-                    <div className="grow w-1/2 border-r border-gray-300"></div>
-                    <div className="grow w-1/2"></div>
-                </div>
-            </div>
-        </div>
-    )
-} */

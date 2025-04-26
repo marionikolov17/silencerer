@@ -1,7 +1,7 @@
 import { createActorContext } from '@xstate/react';
 import { assign, fromPromise, setup } from 'xstate';
 import { VALID_FILE_TYPES, MAX_FILE_SIZE } from '@/constants/files';
-import { renameDuplicateFile } from './files';
+import { renameDuplicateFile } from '../utils/files';
 
 type AppContext = {
   files: File[];

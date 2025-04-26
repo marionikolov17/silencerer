@@ -5,7 +5,7 @@ import { CiMenuKebab } from 'react-icons/ci';
 import { FiEdit2 } from 'react-icons/fi';
 import { PiFileAudioLight, PiTrashBold } from 'react-icons/pi';
 
-export default function AddedMediaItem({ name }: { name: string }) {
+export default function AddedMediaItem({ file }: { file: File }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [screenWidth, setScreenWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,7 +39,7 @@ export default function AddedMediaItem({ name }: { name: string }) {
       <div className="w-full h-12 rounded-lg border border-gray-200 flex items-center px-2 py-1 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
         <PiFileAudioLight className="text-2xl text-blue-500" />
         <div className="grow overflow-hidden">
-          <p className="text-base grow ms-2">{name}</p>
+          <p className="text-base grow ms-2">{file.name}</p>
         </div>
         <button
           className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300"

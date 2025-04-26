@@ -7,3 +7,5 @@ export const VALID_FILE_TYPES = [
   'audio/wav',
   'audio/webm',
 ];
+
+export const MAX_FILE_SIZE = 4000 * 1024 * 1024; // 4GB

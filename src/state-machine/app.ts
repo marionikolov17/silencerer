@@ -1,6 +1,7 @@
 import { createActorContext } from '@xstate/react';
 import { assign, fromPromise, setup } from 'xstate';
-import { VALID_FILE_TYPES } from '@/constants/file-types';
+import { VALID_FILE_TYPES, MAX_FILE_SIZE } from '@/constants/files';
+import { renameDuplicateFile } from './files';
 
 type AppContext = {
   files: File[];
@@ -15,11 +16,24 @@ const appMachine = setup({
   },
   actors: {
     importMediaActor: fromPromise(
-      async ({ input }: { input: { files: File[] } }) => {
-        // TODO: Add a guard for valid files and sizes
-        const files = input.files.filter((file) =>
-          VALID_FILE_TYPES.includes(file.type),
-        );
+      async ({ input }: { input: { files: File[]; context: AppContext } }) => {
+        const files = [];
+
+        for (const file of input.files) {
+          if (
+            VALID_FILE_TYPES.includes(file.type) &&
+            file.size <= MAX_FILE_SIZE
+          ) {
+            const newFile = new File(
+              [file],
+              renameDuplicateFile(file.name, input.context.files),
+              {
+                type: file.type,
+              },
+            );
+            files.push(newFile);
+          }
+        }
 
         return { files };
       },
@@ -42,7 +56,7 @@ const appMachine = setup({
     importing_media: {
       invoke: {
         src: 'importMediaActor',
-        input: ({ event }) => ({ files: event.files }),
+        input: ({ event, context }) => ({ files: event.files, context }),
         onDone: {
           target: 'standby',
           actions: [

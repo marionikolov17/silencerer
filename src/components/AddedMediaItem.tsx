@@ -1,14 +1,17 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import useHandleClickOutside from '@/hooks/useHandleClickOutside';
 import { CiMenuKebab } from 'react-icons/ci';
 import { FiEdit2 } from 'react-icons/fi';
+import { AppMachineContext } from '@/state-machine/app';
+import useHandleClickOutside from '@/hooks/useHandleClickOutside';
 import { PiFileAudioLight, PiTrashBold } from 'react-icons/pi';
 
 export default function AddedMediaItem({ file }: { file: File }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [screenWidth, setScreenWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const appMachineActorRef = AppMachineContext.useActorRef();
 
   useHandleClickOutside(containerRef, () => setIsMenuOpen(false));
 
@@ -33,6 +36,13 @@ export default function AddedMediaItem({ file }: { file: File }) {
 
     return () => window.removeEventListener('scroll', scrollListener);
   }, []);
+
+  const handleRemoveMedia = () => {
+    appMachineActorRef.send({
+      type: 'event.remove_media',
+      fileName: file.name,
+    });
+  };
 
   return (
     <div ref={containerRef} className="relative overflow-x-visible">
@@ -73,7 +83,10 @@ export default function AddedMediaItem({ file }: { file: File }) {
             <FiEdit2 className="text-lg" />
             <p className="text-sm">Rename</p>
           </button>
-          <button className="w-full flex py-2 px-4 text-red-500 items-center gap-x-2 hover:bg-gray-100 transition-all duration-300 cursor-pointer">
+          <button
+            onClick={handleRemoveMedia}
+            className="w-full flex py-2 px-4 text-red-500 items-center gap-x-2 hover:bg-gray-100 transition-all duration-300 cursor-pointer"
+          >
             <PiTrashBold className="text-lg" />
             <p className="text-sm">Remove</p>
           </button>

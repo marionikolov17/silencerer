@@ -1,7 +1,7 @@
 import { createActorContext } from '@xstate/react';
 import { assign, fromPromise, setup } from 'xstate';
 import { VALID_FILE_TYPES, MAX_FILE_SIZE } from '@/constants/files';
-import { renameDuplicateFile } from '../utils/files';
+import { checkIfFileExists, renameDuplicateFile } from '../utils/files';
 
 type AppContext = {
   files: File[];
@@ -9,7 +9,8 @@ type AppContext = {
 
 type AppEvent =
   | { type: 'event.import_media'; files: File[] }
-  | { type: 'event.remove_media'; fileName: string };
+  | { type: 'event.remove_media'; fileName: string }
+  | { type: 'event.rename_media'; fileName: string; newName: string };
 
 const appMachine = setup({
   types: {
@@ -52,6 +53,24 @@ const appMachine = setup({
         return { files };
       },
     ),
+    renameMediaActor: fromPromise(
+      async ({
+        input,
+      }: {
+        input: { fileName: string; newName: string; context: AppContext };
+      }) => {
+        const files = input.context.files.map((file, index) => {
+          if (
+            file.name === input.fileName &&
+            !checkIfFileExists(input.newName, index, input.context.files)
+          ) {
+            return new File([file], input.newName, { type: file.type });
+          }
+          return file;
+        });
+        return { files };
+      },
+    ),
   },
 }).createMachine({
   id: 'app',
@@ -67,6 +86,9 @@ const appMachine = setup({
         },
         'event.remove_media': {
           target: 'removing_media',
+        },
+        'event.rename_media': {
+          target: 'renaming_media',
         },
       },
     },
@@ -111,6 +133,28 @@ const appMachine = setup({
               files: ({ event }) => event.output.files,
             }),
           ],
+        },
+        onError: {
+          target: 'standby',
+        },
+      },
+    },
+    renaming_media: {
+      invoke: {
+        src: 'renameMediaActor',
+        input: ({ event, context }) => {
+          if (event.type === 'event.rename_media') {
+            return {
+              fileName: event.fileName,
+              newName: event.newName,
+              context,
+            };
+          }
+          throw new Error('Invalid event type for renaming media');
+        },
+        onDone: {
+          target: 'standby',
+          actions: [assign({ files: ({ event }) => event.output.files })],
         },
         onError: {
           target: 'standby',

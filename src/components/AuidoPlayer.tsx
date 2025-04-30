@@ -9,6 +9,7 @@ import useAudioTimeBlocks, {
 import { Block } from '@/types/blocks';
 import { useEffect, useState } from 'react';
 import { fetchAudioFromBlocks } from '@/utils/audio';
+import { cn } from '@/utils/cn';
 
 interface InputProps {
   blocks: Block[];
@@ -17,6 +18,7 @@ interface InputProps {
 export default function AudioPlayer({ blocks }: InputProps) {
   const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isFetchingAudio, setIsFetchingAudio] = useState(false);
 
   const markers = useAudioTimeBlocks(duration);
 
@@ -24,19 +26,32 @@ export default function AudioPlayer({ blocks }: InputProps) {
     const fetchAudio = async () => {
       if (blocks.length === 0) return;
 
-      const { blob, buffer } = await fetchAudioFromBlocks(blocks);
+      setIsFetchingAudio(true);
 
-      const url = URL.createObjectURL(blob);
+      try {
+        const { blob, buffer } = await fetchAudioFromBlocks(blocks);
 
-      setAudioUrl(url);
-      setDuration(buffer.duration);
+        const url = URL.createObjectURL(blob);
+
+        setAudioUrl(url);
+        setDuration(buffer.duration);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsFetchingAudio(false);
+      }
     };
 
     fetchAudio();
   }, [blocks]);
 
   return (
-    <div className="w-full flex flex-col pb-2 z-50 bg-white">
+    <div
+      className={cn(
+        'w-full flex flex-col pb-2 z-50 bg-white',
+        isFetchingAudio && 'opacity-50 pointer-events-none',
+      )}
+    >
       <audio src={audioUrl ?? undefined} className="hidden" />
       <div className="w-full h-16 flex items-center justify-between px-4">
         <div className="flex items-center">

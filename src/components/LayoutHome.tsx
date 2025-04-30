@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { AppMachineContext } from '@/state-machine/app';
 import AddedMedia from './AddedMedia';
 import AudioPlayer from './AuidoPlayer';
 import Header from './Header';
 import VideoPreview from './VideoPreview';
-import { AppMachineContext } from '@/state-machine/app';
 
 export default function LayoutHome() {
   const [isMobileMediaOpened, setIsMobileMediaOpened] = useState(false);

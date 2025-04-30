@@ -5,6 +5,12 @@ interface DecodedBlock extends Omit<Block, 'buffer'> {
   buffer: AudioBuffer;
 }
 
+export const decodeAudioBuffer = async (buffer: ArrayBuffer) => {
+  const copiedBuffer = buffer.slice(0);
+  const audioContext = new AudioContext();
+  return await audioContext.decodeAudioData(copiedBuffer);
+};
+
 export const fetchAudioFromBlocks = async (blocks: Block[]) => {
   const copiedBlocks = copyAudioBlocks(blocks);
 

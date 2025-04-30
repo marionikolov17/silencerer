@@ -1,13 +1,14 @@
 'use client';
 
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AiFillBackward, AiFillForward } from 'react-icons/ai';
 import { CiZoomIn, CiZoomOut } from 'react-icons/ci';
 import { IoCutOutline, IoPlay } from 'react-icons/io5';
+import AudioBlock from './AudioBlock';
 import useAudioTimeBlocks, {
   AudioTimeBlockType,
 } from '@/hooks/useAudioTimeBlocks';
 import { Block } from '@/types/blocks';
-import { useEffect, useState } from 'react';
 import { fetchAudioFromBlocks } from '@/utils/audio';
 import { cn } from '@/utils/cn';
 
@@ -19,9 +20,17 @@ export default function AudioPlayer({ blocks }: InputProps) {
   const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isFetchingAudio, setIsFetchingAudio] = useState(false);
+  const [markersWidth, setMarkersWidth] = useState(0);
+
+  const markersRef = useRef<HTMLDivElement>(null);
+
+  const totalBlocksSize = useMemo(() => {
+    return blocks.reduce((acc, block) => acc + block.buffer.byteLength, 0);
+  }, [blocks]);
 
   const markers = useAudioTimeBlocks(duration);
 
+  // Fetch audio
   useEffect(() => {
     const fetchAudio = async () => {
       if (blocks.length === 0) return;
@@ -44,6 +53,19 @@ export default function AudioPlayer({ blocks }: InputProps) {
 
     fetchAudio();
   }, [blocks]);
+
+  // Set markers width
+  useEffect(() => {
+    const handleResize = () => {
+      setMarkersWidth(markersRef.current?.clientWidth ?? 0);
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div
@@ -100,12 +122,15 @@ export default function AudioPlayer({ blocks }: InputProps) {
       {/* Audio Visualizer */}
       <div className="w-full mt-4 h-32 relative flex flex-col px-4 overflow-x-auto">
         {/* Playhead */}
-        <div className="absolute top-0 left-1/2 h-full flex flex-col items-center cursor-pointer">
+        <div className="absolute top-0 left-1/2 h-full flex flex-col items-center cursor-pointer z-40">
           <div className="w-0 h-0 border-l-[10px] translate-y-2 border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-t-blue-500"></div>
           <div className="w-0.5 grow bg-blue-500"></div>
         </div>
         {/* Time Markers */}
-        <div className="flex gap-x-4 justify-between items-center w-max sm:w-full border-b border-gray-200">
+        <div
+          ref={markersRef}
+          className="flex gap-x-4 justify-between items-center min-w-full w-max xl:w-full border-b border-gray-200"
+        >
           {markers.map((marker, index) => {
             if (marker.type === AudioTimeBlockType.MAJOR) {
               return (
@@ -124,7 +149,18 @@ export default function AudioPlayer({ blocks }: InputProps) {
           })}
         </div>
         {/* Waveform and Blocks */}
-        <div className="w-full grow"></div>
+        <div
+          style={{ width: `${markersWidth}px` }}
+          className="grow flex items-end gap-x-[0.6px]"
+        >
+          {blocks.map((block) => (
+            <AudioBlock
+              key={block.id}
+              block={block}
+              totalBlocksSize={totalBlocksSize}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

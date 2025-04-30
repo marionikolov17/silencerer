@@ -151,7 +151,7 @@ export default function AudioPlayer({ blocks }: InputProps) {
         {/* Waveform and Blocks */}
         <div
           style={{ width: `${markersWidth}px` }}
-          className="grow flex items-end gap-x-[0.6px]"
+          className="grow flex items-end"
         >
           {blocks.map((block) => (
             <AudioBlock

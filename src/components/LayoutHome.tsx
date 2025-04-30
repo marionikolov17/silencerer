@@ -3,9 +3,12 @@ import AddedMedia from './AddedMedia';
 import AudioPlayer from './AuidoPlayer';
 import Header from './Header';
 import VideoPreview from './VideoPreview';
+import { AppMachineContext } from '@/state-machine/app';
 
 export default function LayoutHome() {
   const [isMobileMediaOpened, setIsMobileMediaOpened] = useState(false);
+
+  const blocks = AppMachineContext.useSelector((state) => state.context.blocks);
 
   return (
     <main className="w-full min-h-screen relative flex flex-col overflow-x-hidden">
@@ -20,7 +23,7 @@ export default function LayoutHome() {
         </div>
       </div>
       <div className="w-full grow flex flex-col justify-end">
-        <AudioPlayer />
+        <AudioPlayer blocks={blocks} />
       </div>
     </main>
   );

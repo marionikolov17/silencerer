@@ -6,14 +6,38 @@ import { IoCutOutline, IoPlay } from 'react-icons/io5';
 import useAudioTimeBlocks, {
   AudioTimeBlockType,
 } from '@/hooks/useAudioTimeBlocks';
+import { Block } from '@/types/blocks';
+import { useEffect, useState } from 'react';
+import { fetchAudioFromBlocks } from '@/utils/audio';
 
-export default function AudioPlayer() {
-  const exampleDuration = 60;
+interface InputProps {
+  blocks: Block[];
+}
 
-  const markers = useAudioTimeBlocks(exampleDuration);
+export default function AudioPlayer({ blocks }: InputProps) {
+  const [duration, setDuration] = useState(0);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+
+  const markers = useAudioTimeBlocks(duration);
+
+  useEffect(() => {
+    const fetchAudio = async () => {
+      if (blocks.length === 0) return;
+
+      const { blob, buffer } = await fetchAudioFromBlocks(blocks);
+
+      const url = URL.createObjectURL(blob);
+
+      setAudioUrl(url);
+      setDuration(buffer.duration);
+    };
+
+    fetchAudio();
+  }, [blocks]);
 
   return (
     <div className="w-full flex flex-col pb-2 z-50 bg-white">
+      <audio src={audioUrl ?? undefined} className="hidden" />
       <div className="w-full h-16 flex items-center justify-between px-4">
         <div className="flex items-center">
           <button

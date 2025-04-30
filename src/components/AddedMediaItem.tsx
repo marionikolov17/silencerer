@@ -80,6 +80,7 @@ export default function AddedMediaItem({ file }: { file: File }) {
         appMachineActorRef.send({
           type: 'event.load_file',
           buffer: arrayBuffer,
+          file,
         });
       }
     };

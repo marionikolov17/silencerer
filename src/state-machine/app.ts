@@ -1,18 +1,23 @@
 import { createActorContext } from '@xstate/react';
 import { assign, fromPromise, setup } from 'xstate';
 import { VALID_FILE_TYPES, MAX_FILE_SIZE } from '@/constants/files';
-import { checkIfFileExists, renameDuplicateFile } from '../utils/files';
+import {
+  checkIfFileExists,
+  isFileVideo,
+  renameDuplicateFile,
+} from '../utils/files';
+import { Block, BlockType } from '@/types/blocks';
 
 type AppContext = {
   files: File[];
-  buffer: ArrayBuffer | undefined | null;
+  blocks: Block[];
 };
 
 type AppEvent =
   | { type: 'event.import_media'; files: File[] }
   | { type: 'event.remove_media'; fileName: string }
   | { type: 'event.rename_media'; fileName: string; newName: string }
-  | { type: 'event.load_file'; buffer: ArrayBuffer };
+  | { type: 'event.load_file'; buffer: ArrayBuffer; file: File };
 
 const appMachine = setup({
   types: {
@@ -74,8 +79,12 @@ const appMachine = setup({
       },
     ),
     loadFileActor: fromPromise(
-      async ({ input }: { input: { buffer: ArrayBuffer } }) => {
-        return { buffer: input.buffer };
+      async ({ input }: { input: { buffer: ArrayBuffer; file: File } }) => {
+        return {
+          buffer: input.buffer,
+          name: input.file.name,
+          type: isFileVideo(input.file) ? BlockType.Video : BlockType.Image,
+        };
       },
     ),
   },
@@ -85,7 +94,7 @@ const appMachine = setup({
   initial: 'standby',
   context: {
     files: [],
-    buffer: null,
+    blocks: [],
   },
   states: {
     standby: {
@@ -178,13 +187,25 @@ const appMachine = setup({
         src: 'loadFileActor',
         input: ({ event }) => {
           if (event.type === 'event.load_file') {
-            return { buffer: event.buffer };
+            return { buffer: event.buffer, file: event.file };
           }
           throw new Error('Invalid event type for loading file');
         },
         onDone: {
           target: 'standby',
-          actions: [assign({ buffer: ({ event }) => event.output.buffer })],
+          actions: [
+            assign({
+              blocks: ({ context, event }) => [
+                ...context.blocks,
+                {
+                  id: crypto.randomUUID(),
+                  type: event.output.type,
+                  buffer: event.output.buffer,
+                  name: event.output.name,
+                },
+              ],
+            }),
+          ],
         },
         onError: {
           target: 'standby',

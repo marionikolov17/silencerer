@@ -11,6 +11,7 @@ import {
 } from 'react-icons/pi';
 import { cn } from '@/utils/cn';
 import { isFileVideo } from '@/utils/files';
+
 export default function AddedMediaItem({ file }: { file: File }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -67,8 +68,33 @@ export default function AddedMediaItem({ file }: { file: File }) {
     setIsRenaming((value) => (value === false ? value : false));
   };
 
+  const handleLoadFile = () => {
+    const reader = new FileReader();
+
+    reader.readAsArrayBuffer(file);
+
+    reader.onload = (event) => {
+      const arrayBuffer = event.target?.result;
+
+      if (arrayBuffer instanceof ArrayBuffer) {
+        appMachineActorRef.send({
+          type: 'event.load_file',
+          buffer: arrayBuffer,
+        });
+      }
+    };
+
+    reader.onerror = (event) => {
+      console.log('Error', event);
+    };
+  };
+
   return (
-    <div ref={containerRef} className="relative overflow-x-visible">
+    <div
+      ref={containerRef}
+      className="relative overflow-x-visible"
+      onDoubleClick={handleLoadFile}
+    >
       <div className="w-full h-12 rounded-lg border border-gray-200 flex items-center px-2 py-1 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
         <div
           className={cn(

@@ -5,12 +5,14 @@ import { checkIfFileExists, renameDuplicateFile } from '../utils/files';
 
 type AppContext = {
   files: File[];
+  buffer: ArrayBuffer | undefined | null;
 };
 
 type AppEvent =
   | { type: 'event.import_media'; files: File[] }
   | { type: 'event.remove_media'; fileName: string }
-  | { type: 'event.rename_media'; fileName: string; newName: string };
+  | { type: 'event.rename_media'; fileName: string; newName: string }
+  | { type: 'event.load_file'; buffer: ArrayBuffer };
 
 const appMachine = setup({
   types: {
@@ -71,6 +73,11 @@ const appMachine = setup({
         return { files };
       },
     ),
+    loadFileActor: fromPromise(
+      async ({ input }: { input: { buffer: ArrayBuffer } }) => {
+        return { buffer: input.buffer };
+      },
+    ),
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QEMAOqB0sAuyB2EARgJ4DEYAbmHthgJYC2qA9gE7YD6DkdyA2gAYAuolAtYdbHWZ5RIAB6IAzACYlGAQDYVAVgA0IYogAsARhUYAnFoGWA7GZWnbxgL6uDaTDnxEylalpWMAZmKi4efmE5cUlpWSQFZVNNK00ADjt9Q0R00wwdd090LFwCEnIqGgxgvGRuCIheQRFE2KkZOUUEDJ0MUztTTOyjBCUBfMt0pRS7JSzpuwE7IpAveiY2KTwoRt5SCBkwejwKZgBrY-XGFnY6Hb3kBHuzgGNkDrwWlpjmCU+usoBH1bPMRogVHYLMYdOMlEpjMYoZodJpVtdNncHtwmshyKxWGwMKgADYfABmbAYGAxt22uxxvGep2Y70+32ibT+cU6iW64xBljBBlGShRGGMWnMdksKksGSy6JKwVCFHuDMiByOJzOlxpypCYXVj2Zbw+8Q5rTE3IBfKBguFOQQphmVks7s0lmM6RUxic6XSSswKqN2M1YAJRNJFKp+uDhrVYdxptZ5pklt+-3igLGwI0QqyIohvqssK0Snl3uMYKDNWo9WNjLxhzwxxeFyuBrqDEbkRTbItwh+XKzvNA3V6-UGwyLCBUtg042WKnSQrMOhUtdqDaT+wjhNYxLJ2EprGp623Pd3T3bA-TQ851tHCXHiAyqR0plRulnKXyZecBFnHdeFN1WPBmAgOA5C8TMeRfJIEAAWk0WcUNrHxylGJ94JzHRPynIZCydOUBAwJQdDyDdTAGARvVrG4tl7XE4NtV8ECRcjzHBMZPQwOw8gEH0v1AgQlC3BNmN4VjsztDiVF-Ow7AwH10jozIbB0JEJO7KTkBksdEMsGj+KInj50sfjUW0CYEW0TQXXcdwgA */
@@ -78,6 +85,7 @@ const appMachine = setup({
   initial: 'standby',
   context: {
     files: [],
+    buffer: null,
   },
   states: {
     standby: {
@@ -90,6 +98,9 @@ const appMachine = setup({
         },
         'event.rename_media': {
           target: 'renaming_media',
+        },
+        'event.load_file': {
+          target: 'loading_file',
         },
       },
     },
@@ -156,6 +167,24 @@ const appMachine = setup({
         onDone: {
           target: 'standby',
           actions: [assign({ files: ({ event }) => event.output.files })],
+        },
+        onError: {
+          target: 'standby',
+        },
+      },
+    },
+    loading_file: {
+      invoke: {
+        src: 'loadFileActor',
+        input: ({ event }) => {
+          if (event.type === 'event.load_file') {
+            return { buffer: event.buffer };
+          }
+          throw new Error('Invalid event type for loading file');
+        },
+        onDone: {
+          target: 'standby',
+          actions: [assign({ buffer: ({ event }) => event.output.buffer })],
         },
         onError: {
           target: 'standby',

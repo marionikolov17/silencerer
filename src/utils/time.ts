@@ -10,3 +10,15 @@ export function formatTime(seconds: number) {
     return `${seconds}s`;
   }
 }
+
+export function formatMediaTime(seconds: number, includeFrames = true) {
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  const frames = Math.floor((seconds % 1) * 24);
+
+  const pad = (n: number) => n.toString().padStart(2, '0');
+
+  let result = `${pad(minutes)}:${pad(secs)}`;
+  if (includeFrames) result += `:${pad(frames)}`;
+  return result;
+}

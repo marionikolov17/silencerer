@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AiFillBackward, AiFillForward } from 'react-icons/ai';
 import { CiZoomIn, CiZoomOut } from 'react-icons/ci';
-import { IoCutOutline, IoPlay } from 'react-icons/io5';
+import { IoCutOutline, IoPause, IoPlay } from 'react-icons/io5';
 import AudioBlock from './AudioBlock';
 import useAudioTimeBlocks, {
   AudioTimeBlockType,
@@ -11,6 +11,8 @@ import useAudioTimeBlocks, {
 import { Block } from '@/types/blocks';
 import { fetchAudioFromBlocks } from '@/utils/audio';
 import { cn } from '@/utils/cn';
+import { formatMediaTime } from '@/utils/time';
+import { usePlayer } from '@/contexts/player';
 
 interface InputProps {
   blocks: Block[];
@@ -29,6 +31,19 @@ export default function AudioPlayer({ blocks }: InputProps) {
   }, [blocks]);
 
   const markers = useAudioTimeBlocks(duration);
+
+  const {
+    isPlaying,
+    timeDisplayRef,
+    timelineRef,
+    seekerRef,
+    audioRef,
+    handlePlayAndPause,
+    handleFrameNavigation,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+  } = usePlayer();
 
   // Fetch audio
   useEffect(() => {
@@ -74,7 +89,7 @@ export default function AudioPlayer({ blocks }: InputProps) {
         isFetchingAudio && 'opacity-50 pointer-events-none',
       )}
     >
-      <audio src={audioUrl ?? undefined} className="hidden" />
+      <audio ref={audioRef} src={audioUrl ?? undefined} className="hidden" />
       <div className="w-full h-16 flex items-center justify-between px-4">
         <div className="flex items-center">
           <button
@@ -91,22 +106,36 @@ export default function AudioPlayer({ blocks }: InputProps) {
             title="Backward"
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
           >
-            <AiFillBackward className="text-lg sm:text-xl" />
+            <AiFillBackward
+              className="text-lg sm:text-xl"
+              onClick={() => handleFrameNavigation('backward')}
+            />
           </button>
           <button
             title="Play"
+            onClick={handlePlayAndPause}
             className="p-3 mx-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
           >
-            <IoPlay className="text-xl sm:text-2xl" />
+            {isPlaying ? (
+              <IoPause className="text-xl sm:text-2xl" />
+            ) : (
+              <IoPlay className="text-xl sm:text-2xl" />
+            )}
           </button>
           <button
             title="Forward"
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
           >
-            <AiFillForward className="text-lg sm:text-xl" />
+            <AiFillForward
+              className="text-lg sm:text-xl"
+              onClick={() => handleFrameNavigation('forward')}
+            />
           </button>
-          <p className="text-sm sm:text-base ms-2 text-gray-500">
-            00:00:00 / 01:00:00
+          <p className="text-sm sm:text-base ms-2 text-gray-500 flex gap-x-1">
+            <span ref={timeDisplayRef} className="w-16">
+              00:00:00
+            </span>
+            /<span>{formatMediaTime(duration)}</span>
           </p>
         </div>
         <div className="hidden lg:flex items-center">
@@ -120,9 +149,24 @@ export default function AudioPlayer({ blocks }: InputProps) {
         </div>
       </div>
       {/* Audio Visualizer */}
-      <div className="w-full mt-4 h-32 relative flex flex-col px-4 overflow-x-auto">
+      <div
+        ref={timelineRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className="w-full mt-4 h-32 relative flex flex-col px-4 overflow-x-auto no-scrollbar"
+      >
         {/* Playhead */}
-        <div className="absolute top-0 left-1/2 h-full flex flex-col items-center cursor-pointer z-40">
+        <div
+          ref={seekerRef}
+          className="absolute top-0 left-1/2 h-full flex flex-col items-center cursor-pointer z-40"
+          style={{
+            transitionProperty: 'left',
+            transitionDuration: '100ms',
+            transitionTimingFunction: 'linear',
+          }}
+        >
           <div className="w-0 h-0 border-l-[10px] translate-y-2 border-l-transparent border-r-[10px] border-r-transparent border-t-[14px] border-t-blue-500"></div>
           <div className="w-0.5 grow bg-blue-500"></div>
         </div>

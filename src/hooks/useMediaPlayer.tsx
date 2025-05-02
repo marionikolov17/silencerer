@@ -251,6 +251,8 @@ export const useMediaPlayer = (
   ]); */
 
   useEffect(() => {
+    const cleanupFunctions: (() => void)[] = [];
+
     manipulateRefs((ref: RefObject<HTMLVideoElement | HTMLAudioElement>) => {
       const element = ref.current as HTMLAudioElement | HTMLVideoElement;
 
@@ -284,13 +286,19 @@ export const useMediaPlayer = (
       element.addEventListener('pause', handleAudioStatus);
       element.addEventListener('ended', handleEnded);
 
-      return () => {
+      const cleanup = () => {
         element.removeEventListener('loadedmetadata', handleLoadedMetadata);
         element.removeEventListener('play', handleAudioStatus);
         element.removeEventListener('pause', handleAudioStatus);
         element.removeEventListener('ended', handleEnded);
       };
+
+      cleanupFunctions.push(cleanup);
     });
+
+    return () => {
+      cleanupFunctions.forEach((cleanup) => cleanup());
+    };
   }, [
     manipulateRefs,
     handleTimeUpdate,

@@ -95,6 +95,7 @@ export default function AudioPlayer({ blocks }: InputProps) {
           <button
             title="Silence Remove"
             className="flex items-center py-2 px-4 cursor-pointer hover:bg-gray-100 rounded-lg"
+            disabled={!audioUrl}
           >
             <IoCutOutline className="text-2xl" />
             <p className="ms-2 text-base hidden sm:flex">Silence Remove</p>
@@ -105,6 +106,7 @@ export default function AudioPlayer({ blocks }: InputProps) {
           <button
             title="Backward"
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
+            disabled={!audioUrl}
           >
             <AiFillBackward
               className="text-lg sm:text-xl"
@@ -112,8 +114,9 @@ export default function AudioPlayer({ blocks }: InputProps) {
             />
           </button>
           <button
-            title="Play"
+            title={isPlaying ? 'Pause' : 'Play'}
             onClick={handlePlayAndPause}
+            disabled={!audioUrl}
             className="p-3 mx-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
           >
             {isPlaying ? (
@@ -125,6 +128,7 @@ export default function AudioPlayer({ blocks }: InputProps) {
           <button
             title="Forward"
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
+            disabled={!audioUrl}
           >
             <AiFillForward
               className="text-lg sm:text-xl"

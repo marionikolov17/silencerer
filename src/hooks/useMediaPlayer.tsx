@@ -32,7 +32,7 @@ export const useMediaPlayer = (
   const manipulateRefs = useCallback(
     (fn: (ref: RefObject<HTMLVideoElement | HTMLAudioElement>) => void) => {
       refs.forEach((ref) => {
-        if (ref.current) {
+        if (ref.current && ref.current.duration > 0) {
           fn(ref as RefObject<HTMLVideoElement | HTMLAudioElement>);
         }
       });

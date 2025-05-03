@@ -20,6 +20,7 @@ interface InputProps {
 export default function AudioPlayer({ blocks }: InputProps) {
   const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(100);
   const [isFetchingAudio, setIsFetchingAudio] = useState(false);
   const [markersWidth, setMarkersWidth] = useState(0);
 
@@ -142,10 +143,11 @@ export default function AudioPlayer({ blocks }: InputProps) {
           </p>
         </div>
         <div className="hidden lg:flex items-center">
-          <ZoomController />
+          <ZoomController zoom={zoom} setZoom={setZoom} />
           <button
             title="Zoom 100%"
             className="ms-4 py-2 px-4 rounded-full hover:bg-gray-100 cursor-pointer"
+            onClick={() => setZoom(100)}
           >
             Fit to screen
           </button>

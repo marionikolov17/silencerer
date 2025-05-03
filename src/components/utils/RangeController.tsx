@@ -6,6 +6,7 @@ import { cn } from '@/utils/cn';
 interface RangeControllerProps {
   min: number;
   max: number;
+  value: number;
   updateValue: (value: number) => void;
   className?: string;
   backgroundColorClassName?: string;
@@ -21,6 +22,7 @@ interface RangeControllerProps {
 export default function RangeController({
   min,
   max,
+  value,
   updateValue,
   className = 'w-40',
   backgroundColorClassName = 'bg-gray-200',
@@ -92,6 +94,10 @@ export default function RangeController({
     updateValue(calculateValue(min, max, progress));
   }, [progress, min, max, updateValue]);
 
+  useEffect(() => {
+    setProgress(calculateProgress(min, max, value));
+  }, [value, min, max]);
+
   return (
     <div
       className={cn(
@@ -136,6 +142,10 @@ export default function RangeController({
       ></div>
     </div>
   );
+}
+
+export function calculateProgress(min: number, max: number, value: number) {
+  return ((value - min) / (max - min)) * 100;
 }
 
 export function calculateValue(min: number, max: number, progress: number) {

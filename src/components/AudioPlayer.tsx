@@ -25,6 +25,8 @@ export default function AudioPlayer({ blocks }: InputProps) {
   const [markersWidth, setMarkersWidth] = useState(0);
 
   const markersRef = useRef<HTMLDivElement>(null);
+  const originalWidth = useRef(0);
+  const originalMarkersWidth = useRef(0);
 
   const totalBlocksSize = useMemo(() => {
     return blocks.reduce((acc, block) => acc + block.buffer.byteLength, 0);
@@ -81,6 +83,27 @@ export default function AudioPlayer({ blocks }: InputProps) {
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Update UI with zoom
+  useEffect(() => {
+    if (timelineRef.current && markersRef.current) {
+      if (originalWidth.current === 0) {
+        originalWidth.current =
+          timelineRef.current.getBoundingClientRect().width;
+      }
+
+      if (originalMarkersWidth.current === 0) {
+        originalMarkersWidth.current =
+          markersRef.current.getBoundingClientRect().width;
+      }
+
+      const newWidth = originalWidth.current * (zoom / 100);
+      const newMarkersWidth = originalMarkersWidth.current * (zoom / 100);
+      timelineRef.current.style.width = `${newWidth}px`;
+      markersRef.current.style.width = `${newMarkersWidth}px`;
+      setMarkersWidth(newMarkersWidth);
+    }
+  }, [zoom, timelineRef, markersRef]);
 
   return (
     <div

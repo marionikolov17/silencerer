@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AiFillBackward, AiFillForward } from 'react-icons/ai';
-import { CiZoomIn, CiZoomOut } from 'react-icons/ci';
 import { IoCutOutline, IoPause, IoPlay } from 'react-icons/io5';
 import AudioBlock from './AudioBlock';
 import useAudioTimeBlocks, {
@@ -13,7 +12,7 @@ import { fetchAudioFromBlocks } from '@/utils/audio';
 import { cn } from '@/utils/cn';
 import { formatMediaTime } from '@/utils/time';
 import { usePlayer } from '@/contexts/player';
-
+import ZoomController from './ZoomController';
 interface InputProps {
   blocks: Block[];
 }
@@ -167,7 +166,7 @@ export default function AudioPlayer({ blocks }: InputProps) {
           className="absolute top-0 left-1/2 h-full flex flex-col items-center cursor-pointer z-40"
           style={{
             transitionProperty: 'left',
-            transitionDuration: '100ms',
+            transitionDuration: isPlaying ? '100ms' : '0ms',
             transitionTimingFunction: 'linear',
           }}
         >
@@ -210,31 +209,6 @@ export default function AudioPlayer({ blocks }: InputProps) {
           ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-function ZoomController() {
-  return (
-    <div className="flex items-center gap-x-4">
-      <button
-        title="Zoom In"
-        className="rounded-full flex items-center justify-center cursor-pointer hover:text-blue-500"
-      >
-        <CiZoomIn className="text-2xl" />
-      </button>
-      <div className="w-40 h-full relative flex items-center">
-        <div className="w-full h-0.5 bg-gray-200">
-          <div className="w-1/2 h-full bg-blue-500"></div>
-        </div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-4 h-4 border-3 border-blue-500 bg-white cursor-pointer"></div>
-      </div>
-      <button
-        title="Zoom Out"
-        className="rounded-full flex items-center justify-center cursor-pointer hover:text-blue-500"
-      >
-        <CiZoomOut className="text-2xl" />
-      </button>
     </div>
   );
 }

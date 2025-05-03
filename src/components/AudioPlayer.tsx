@@ -84,7 +84,7 @@ export default function AudioPlayer({ blocks }: InputProps) {
   return (
     <div
       className={cn(
-        'w-full flex flex-col pb-2 z-50 bg-white',
+        'w-full flex flex-col pb-2 z-50 bg-white select-none',
         isFetchingAudio && 'opacity-50 pointer-events-none',
       )}
     >

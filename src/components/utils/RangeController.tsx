@@ -93,7 +93,12 @@ export default function RangeController({
   }, [progress, min, max, updateValue]);
 
   return (
-    <div className={cn('w-40 h-full relative flex items-center', className)}>
+    <div
+      className={cn(
+        'w-40 h-full relative flex items-center select-none',
+        className,
+      )}
+    >
       <div
         className={cn('w-full h-0.5', backgroundColorClassName)}
         style={{ backgroundColor: backgroundColor || undefined }}
@@ -110,9 +115,10 @@ export default function RangeController({
       </div>
       <div
         className={cn(
-          'absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-4 h-4 border-3 border-blue-500 bg-white cursor-pointer',
+          'absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-4 h-4 border-3 border-blue-500 bg-white cursor-grab select-none',
           pointerBorderColorClassName,
           pointerColorClassName,
+          isDragging && 'cursor-grabbing',
         )}
         style={{
           borderColor: pointerBorderColor || undefined,

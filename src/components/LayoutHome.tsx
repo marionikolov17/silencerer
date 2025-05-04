@@ -21,7 +21,10 @@ export default function LayoutHome() {
           />
           <div className="grow flex flex-col w-full sm:w-auto">
             <Header />
-            <VideoPreview setIsMobileMediaOpened={setIsMobileMediaOpened} />
+            <VideoPreview
+              setIsMobileMediaOpened={setIsMobileMediaOpened}
+              blocks={blocks}
+            />
           </div>
         </div>
         <div className="w-full grow flex flex-col justify-end">

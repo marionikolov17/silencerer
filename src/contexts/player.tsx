@@ -1,9 +1,9 @@
 'use client';
 
-import { useMediaPlayer } from '@/hooks/useMediaPlayer';
+import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { createContext, useContext, useRef, useState } from 'react';
 
-interface PlayerContextType extends ReturnType<typeof useMediaPlayer> {
+interface PlayerContextType extends ReturnType<typeof useAudioPlayer> {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   currentTime: number;
@@ -32,7 +32,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-  } = useMediaPlayer([audioRef, videoRef], updateCurrentTime);
+    registerVideoRef,
+  } = useAudioPlayer(audioRef, updateCurrentTime);
 
   return (
     <PlayerContext.Provider
@@ -50,6 +51,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         audioRef,
         videoRef,
         currentTime,
+        registerVideoRef,
       }}
     >
       {children}

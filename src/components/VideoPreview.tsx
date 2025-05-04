@@ -1,18 +1,49 @@
 'use client';
 
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
+import { usePlayer } from '@/contexts/player';
+import { fetchVideoFromBlocks } from '@/utils/video';
+import { Block } from '@/types/blocks';
 
 interface InputProps {
   setIsMobileMediaOpened: Dispatch<SetStateAction<boolean>>;
+  blocks: Block[];
 }
 
-export default function VideoPreview({ setIsMobileMediaOpened }: InputProps) {
+export default function VideoPreview({
+  setIsMobileMediaOpened,
+  blocks,
+}: InputProps) {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+  const { registerVideoRef } = usePlayer();
+
+  useEffect(() => {
+    const fetchVideo = async () => {
+      if (blocks.length === 0) return;
+      const videoBlob = await fetchVideoFromBlocks(blocks);
+
+      const videoUrl = URL.createObjectURL(videoBlob);
+
+      setVideoUrl(videoUrl);
+    };
+
+    fetchVideo();
+  }, [blocks]);
+
   return (
     <div className="w-full grow flex flex-col items-center overflow-hidden">
       <div className="w-full grow flex items-center justify-center py-8 px-8 overflow-hidden">
         {/* Place Video here */}
-        <div className="bg-black w-full min-h-[250px] sm:w-[600px] sm:h-[338px] 2xl:w-[800px] 2xl:h-[450px]"></div>
+        <div className="bg-black w-full flex items-center justify-center min-h-[250px] sm:w-[600px] sm:h-[338px] 2xl:w-[800px] 2xl:h-[450px]">
+          <video
+            ref={(ref) => registerVideoRef(ref)}
+            src={videoUrl ?? undefined}
+            muted
+            className="object-cover"
+          />
+        </div>
       </div>
       <div className="w-full py-8 flex items-center justify-center">
         <div className="h-12 bg-white rounded-lg flex items-center gap-x-4 px-4 overflow-hidden">

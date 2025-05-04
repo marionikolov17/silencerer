@@ -27,10 +27,15 @@ export default function AudioBlock({ block, totalBlocksSize }: InputProps) {
     fetchAudioBuffer();
   }, [block.buffer]);
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div
-      className="h-20 relative flex items-end px-4 pb-2 grow rounded-lg overflow-hidden border-2 border-blue-300 bg-blue-100"
+      className="h-20 relative flex items-end px-4 pb-2 grow rounded-lg overflow-hidden border-2 border-blue-300 bg-blue-100 cursor-pointer hover:bg-blue-200 transition-colors duration-200"
       style={{ width: `${blockSizePercentage}%` }}
+      onMouseDown={handleMouseDown}
     >
       <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0" />
       <p className="text-sm text-[#1a365d] z-20">{block.name}</p>

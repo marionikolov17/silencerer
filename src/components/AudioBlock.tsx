@@ -29,7 +29,7 @@ export default function AudioBlock({ block, totalBlocksSize }: InputProps) {
 
   return (
     <div
-      className="h-20 relative flex items-end px-4 pb-2 rounded-lg overflow-hidden border-2 border-blue-300 bg-blue-100"
+      className="h-20 relative flex items-end px-4 pb-2 grow rounded-lg overflow-hidden border-2 border-blue-300 bg-blue-100"
       style={{ width: `${blockSizePercentage}%` }}
     >
       <canvas ref={canvasRef} className="w-full h-full absolute top-0 left-0" />

@@ -29,6 +29,25 @@ export const useAudioPlayer = (
   const timeDisplayRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
 
+  // Video sync
+  const updateVideoTime = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = ref.current?.currentTime ?? 0;
+    }
+  }, [videoRef, ref]);
+
+  const pauseVideo = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  }, [videoRef]);
+
+  const playVideo = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.play();
+    }
+  }, [videoRef]);
+
   // Handlers
   const updateDisplayTime = useCallback(
     (element: HTMLAudioElement | HTMLVideoElement) => {
@@ -60,10 +79,18 @@ export const useAudioPlayer = (
     setDuration(element.duration);
     updateCurrentTime(element.currentTime);
 
+    updateVideoTime();
+
     updateSeekerPosition(ref as RefObject<HTMLVideoElement | HTMLAudioElement>);
 
     updateDisplayTime(element);
-  }, [ref, updateCurrentTime, updateDisplayTime, updateSeekerPosition]);
+  }, [
+    ref,
+    updateCurrentTime,
+    updateDisplayTime,
+    updateSeekerPosition,
+    updateVideoTime,
+  ]);
 
   const handlePlayAndPause = useCallback(() => {
     if (!ref.current) return;
@@ -71,13 +98,14 @@ export const useAudioPlayer = (
     const element = ref.current as HTMLAudioElement | HTMLVideoElement;
 
     if (isPlaying) {
-      element.pause();
+      pauseVideo();
       setIsPlaying(false);
     } else {
       element.play();
+      playVideo();
       setIsPlaying(true);
     }
-  }, [ref, isPlaying]);
+  }, [ref, isPlaying, pauseVideo, playVideo]);
 
   const handleSeek = useCallback(
     (clientX: number) => {

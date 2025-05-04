@@ -98,6 +98,7 @@ export const useAudioPlayer = (
     const element = ref.current as HTMLAudioElement | HTMLVideoElement;
 
     if (isPlaying) {
+      element.pause();
       pauseVideo();
       setIsPlaying(false);
     } else {

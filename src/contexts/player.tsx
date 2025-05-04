@@ -32,8 +32,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    registerVideoRef,
-  } = useAudioPlayer(audioRef, updateCurrentTime);
+  } = useAudioPlayer(audioRef, videoRef, updateCurrentTime);
 
   return (
     <PlayerContext.Provider
@@ -51,7 +50,6 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         audioRef,
         videoRef,
         currentTime,
-        registerVideoRef,
       }}
     >
       {children}

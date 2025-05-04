@@ -17,7 +17,7 @@ export default function VideoPreview({
 }: InputProps) {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
-  const { registerVideoRef } = usePlayer();
+  const { videoRef } = usePlayer();
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -38,7 +38,7 @@ export default function VideoPreview({
         {/* Place Video here */}
         <div className="bg-black w-full flex items-center justify-center min-h-[250px] sm:w-[600px] sm:h-[338px] 2xl:w-[800px] 2xl:h-[450px]">
           <video
-            ref={(ref) => registerVideoRef(ref)}
+            ref={videoRef}
             src={videoUrl ?? undefined}
             muted
             className="object-cover"

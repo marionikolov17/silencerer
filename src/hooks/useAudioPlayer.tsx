@@ -11,11 +11,11 @@ export interface MediaPlayer {
   handleMouseDown: (e: React.MouseEvent) => void;
   handleMouseMove: (e: React.MouseEvent) => void;
   handleMouseUp: () => void;
-  registerVideoRef: (inputRef: HTMLVideoElement | null) => void;
 }
 
 export const useAudioPlayer = (
   ref: React.RefObject<HTMLVideoElement | HTMLAudioElement | null>,
+  videoRef: React.RefObject<HTMLVideoElement | null>,
   updateCurrentTime: (time: number) => void,
 ): MediaPlayer => {
   // State
@@ -24,18 +24,10 @@ export const useAudioPlayer = (
   const [isDragging, setIsDragging] = useState(false);
 
   // Refs
-  const videoRef = useRef<HTMLVideoElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const seekerRef = useRef<HTMLDivElement>(null);
   const timeDisplayRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
-
-  // Utils
-  const registerVideoRef = useCallback((inputRef: HTMLVideoElement | null) => {
-    if (inputRef) {
-      videoRef.current = inputRef;
-    }
-  }, []);
 
   // Handlers
   const updateDisplayTime = useCallback(
@@ -193,6 +185,5 @@ export const useAudioPlayer = (
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    registerVideoRef,
   };
 };

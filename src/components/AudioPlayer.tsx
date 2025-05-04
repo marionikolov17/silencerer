@@ -23,8 +23,6 @@ export default function AudioPlayer({ blocks }: InputProps) {
   const [markersWidth, setMarkersWidth] = useState(0);
 
   const markersRef = useRef<HTMLDivElement>(null);
-  // const originalWidth = useRef(0);
-  // const originalMarkersWidth = useRef(0);
 
   const totalBlocksSize = useMemo(() => {
     return blocks.reduce((acc, block) => acc + block.buffer.byteLength, 0);
@@ -48,7 +46,11 @@ export default function AudioPlayer({ blocks }: InputProps) {
   // Fetch audio
   useEffect(() => {
     const fetchAudio = async () => {
-      if (blocks.length === 0) return;
+      if (blocks.length === 0) {
+        setAudioUrl(null);
+        setDuration(0);
+        return;
+      }
 
       setIsFetchingAudio(true);
 

@@ -12,7 +12,6 @@ import { fetchAudioFromBlocks } from '@/utils/audio';
 import { cn } from '@/utils/cn';
 import { formatMediaTime } from '@/utils/time';
 import { usePlayer } from '@/contexts/player';
-import ZoomController from './ZoomController';
 interface InputProps {
   blocks: Block[];
 }
@@ -20,7 +19,6 @@ interface InputProps {
 export default function AudioPlayer({ blocks }: InputProps) {
   const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(100);
   const [isFetchingAudio, setIsFetchingAudio] = useState(false);
   const [markersWidth, setMarkersWidth] = useState(0);
 
@@ -84,27 +82,6 @@ export default function AudioPlayer({ blocks }: InputProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  /* // Update UI with zoom
-  useEffect(() => {
-    if (timelineRef.current && markersRef.current) {
-      if (originalWidth.current === 0) {
-        originalWidth.current =
-          timelineRef.current.getBoundingClientRect().width;
-      }
-
-      if (originalMarkersWidth.current === 0) {
-        originalMarkersWidth.current =
-          markersRef.current.getBoundingClientRect().width;
-      }
-
-      const newWidth = originalWidth.current * (zoom / 100);
-      const newMarkersWidth = originalMarkersWidth.current * (zoom / 100);
-      timelineRef.current.style.width = `${newWidth}px`;
-      markersRef.current.style.width = `${newMarkersWidth}px`;
-      setMarkersWidth(newMarkersWidth);
-    }
-  }, [zoom, timelineRef, markersRef]); */
-
   return (
     <div
       className={cn(
@@ -166,14 +143,13 @@ export default function AudioPlayer({ blocks }: InputProps) {
           </p>
         </div>
         <div className="hidden lg:flex items-center">
-          <ZoomController zoom={zoom} setZoom={setZoom} />
-          <button
+          {/* <button
             title="Zoom 100%"
             className="ms-4 py-2 px-4 rounded-full hover:bg-gray-100 cursor-pointer"
             onClick={() => setZoom(100)}
           >
             Fit to screen
-          </button>
+          </button> */}
         </div>
       </div>
       {/* Audio Visualizer */}

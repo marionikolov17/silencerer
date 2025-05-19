@@ -6,6 +6,6 @@ export type Block = {
 };
 
 export enum BlockType {
-  Image = 'image',
+  Audio = 'audio',
   Video = 'video',
 }

@@ -84,7 +84,7 @@ const appMachine = setup({
         return {
           buffer: input.buffer,
           name: input.file.name,
-          type: isFileVideo(input.file) ? BlockType.Video : BlockType.Image,
+          type: isFileVideo(input.file) ? BlockType.Video : BlockType.Audio,
         };
       },
     ),

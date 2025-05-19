@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { fetchVideoFromBlocks } from '@/utils/video';
 import { Block } from '@/types/blocks';
+import { usePlayer } from '@/contexts/player';
 
 interface InputProps {
   setIsMobileMediaOpened: Dispatch<SetStateAction<boolean>>;
@@ -15,6 +16,7 @@ export default function VideoPreview({
   blocks,
 }: InputProps) {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const { videoRef } = usePlayer(); 
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -33,14 +35,12 @@ export default function VideoPreview({
       <div className="w-full grow flex items-center justify-center py-8 px-8 overflow-hidden">
         {/* Place Video here */}
         <div className="bg-black w-full min-h-[250px] sm:w-[600px] sm:h-[338px] 2xl:w-[800px] 2xl:h-[450px]">
-          {videoSrc && (
             <video
-              src={videoSrc}
-              autoPlay
+              src={videoSrc ?? undefined}
               muted
+              ref={videoRef}
               className="w-full h-full object-cover"
             />
-          )}
         </div>
       </div>
       <div className="w-full py-8 flex items-center justify-center">

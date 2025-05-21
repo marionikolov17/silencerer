@@ -12,11 +12,11 @@ export interface SilencerOptions {
   crossfadeDuration?: number;
 }
 
-/* 
-  This class is used to remove silence from an audio buffer.
-  It uses a threshold to detect silence, a minimum silence duration to determine if a segment is silence,
-  a frame time to determine the size of the frames to process, and a crossfade duration to apply a crossfade transition between segments.
-*/
+/**
+ * This class is used to remove silence from an audio buffer.
+ * It uses a threshold to detect silence, a minimum silence duration to determine if a segment is silence,
+ * a frame time to determine the size of the frames to process, and a crossfade duration to apply a crossfade transition between segments.
+ */
 class Silencer {
   private readonly threshold: number;
   private readonly minimumSilenceDuration: number;

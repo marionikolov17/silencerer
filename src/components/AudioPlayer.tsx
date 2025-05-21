@@ -12,6 +12,7 @@ import { fetchAudioFromBlocks } from '@/utils/audio';
 import { cn } from '@/utils/cn';
 import { formatMediaTime } from '@/utils/time';
 import { usePlayer } from '@/contexts/player';
+import { AppMachineContext } from '@/state-machine/app';
 interface InputProps {
   blocks: Block[];
 }
@@ -22,7 +23,13 @@ export default function AudioPlayer({ blocks }: InputProps) {
   const [isFetchingAudio, setIsFetchingAudio] = useState(false);
   const [markersWidth, setMarkersWidth] = useState(0);
 
+  const isRemovingSilence = AppMachineContext.useSelector(
+    (state) => state.context.isRemovingSilence,
+  );
+
   const markersRef = useRef<HTMLDivElement>(null);
+
+  const appMachineActorRef = AppMachineContext.useActorRef();
 
   const totalBlocksSize = useMemo(() => {
     return blocks.reduce((acc, block) => acc + block.buffer.byteLength, 0);
@@ -84,11 +91,16 @@ export default function AudioPlayer({ blocks }: InputProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const handleSilenceRemove = () => {
+    appMachineActorRef.send({ type: 'event.silence_remove' });
+  };
+
   return (
     <div
       className={cn(
         'w-full flex flex-col pb-2 z-50 bg-white select-none',
         isFetchingAudio && 'opacity-50 pointer-events-none',
+        isRemovingSilence && 'opacity-50 pointer-events-none',
       )}
     >
       <audio ref={audioRef} src={audioUrl ?? undefined} className="hidden" />
@@ -97,7 +109,8 @@ export default function AudioPlayer({ blocks }: InputProps) {
           <button
             title="Silence Remove"
             className="flex items-center py-2 px-4 cursor-pointer hover:bg-gray-100 rounded-lg"
-            disabled={!audioUrl}
+            disabled={!audioUrl || isRemovingSilence}
+            onClick={handleSilenceRemove}
           >
             <IoCutOutline className="text-2xl" />
             <p className="ms-2 text-base hidden sm:flex">Silence Remove</p>
@@ -108,17 +121,15 @@ export default function AudioPlayer({ blocks }: InputProps) {
           <button
             title="Backward"
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
-            disabled={!audioUrl}
+            disabled={!audioUrl || isRemovingSilence}
+            onClick={() => handleFrameNavigation('backward')}
           >
-            <AiFillBackward
-              className="text-lg sm:text-xl"
-              onClick={() => handleFrameNavigation('backward')}
-            />
+            <AiFillBackward className="text-lg sm:text-xl" />
           </button>
           <button
             title={isPlaying ? 'Pause' : 'Play'}
             onClick={handlePlayAndPause}
-            disabled={!audioUrl}
+            disabled={!audioUrl || isRemovingSilence}
             className="p-3 mx-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
           >
             {isPlaying ? (
@@ -130,12 +141,10 @@ export default function AudioPlayer({ blocks }: InputProps) {
           <button
             title="Forward"
             className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer"
-            disabled={!audioUrl}
+            disabled={!audioUrl || isRemovingSilence}
+            onClick={() => handleFrameNavigation('forward')}
           >
-            <AiFillForward
-              className="text-lg sm:text-xl"
-              onClick={() => handleFrameNavigation('forward')}
-            />
+            <AiFillForward className="text-lg sm:text-xl" />
           </button>
           <p className="text-sm sm:text-base ms-2 text-gray-500 flex gap-x-1">
             <span ref={timeDisplayRef} className="w-16">

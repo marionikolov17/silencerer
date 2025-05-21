@@ -13,6 +13,7 @@ import { cn } from '@/utils/cn';
 import { formatMediaTime } from '@/utils/time';
 import { usePlayer } from '@/contexts/player';
 import { AppMachineContext } from '@/state-machine/app';
+import SilenceRemovalScreen from './SilenceRemovalScreen';
 interface InputProps {
   blocks: Block[];
 }
@@ -100,7 +101,6 @@ export default function AudioPlayer({ blocks }: InputProps) {
       className={cn(
         'w-full flex flex-col pb-2 z-50 bg-white select-none',
         isFetchingAudio && 'opacity-50 pointer-events-none',
-        isRemovingSilence && 'opacity-50 pointer-events-none',
       )}
     >
       <audio ref={audioRef} src={audioUrl ?? undefined} className="hidden" />
@@ -172,6 +172,7 @@ export default function AudioPlayer({ blocks }: InputProps) {
         onMouseLeave={handleMouseUp}
         className="w-full mt-4 h-32 relative flex flex-col px-4 overflow-x-auto no-scrollbar"
       >
+        {isRemovingSilence && <SilenceRemovalScreen />}
         {/* Playhead */}
         <div
           ref={seekerRef}

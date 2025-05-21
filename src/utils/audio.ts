@@ -48,11 +48,9 @@ const mergeDecodedAudioBlocks = (decodedBlocks: DecodedBlock[]) => {
 };
 
 const decodeAudioBlocks = async (blocks: Block[]): Promise<DecodedBlock[]> => {
-  const audioContext = new AudioContext();
-
   const audioBlocks = await Promise.all(
     blocks.map(async (block) => {
-      const audioBuffer = await audioContext.decodeAudioData(block.buffer);
+      const audioBuffer = await decodeAudioBuffer(block.buffer);
       return {
         ...block,
         buffer: audioBuffer,

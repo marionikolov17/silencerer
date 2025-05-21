@@ -1,8 +1,29 @@
+/**
+ * Encodes an AudioBuffer to a WAV Blob.
+ * @param audioBuffer - The AudioBuffer to encode.
+ * @returns A Blob containing the WAV data.
+ */
 export const encodeWAV = (audioBuffer: AudioBuffer): Blob => {
-  const numChannels = 1;
-  const sampleRate = audioBuffer.sampleRate;
-  const numSamples = audioBuffer.length;
-  const bytesPerSample = 2;
+  const buffer = audioBufferToWav(audioBuffer);
+
+  return new Blob([buffer], { type: 'audio/wav' });
+};
+
+/**
+ * Converts an AudioBuffer to a WAV ArrayBuffer.
+ * @param audioBuffer - The AudioBuffer to convert.
+ * @param numChannels - The number of channels in the audio buffer.
+ * @param sampleRate - The sample rate of the audio buffer.
+ * @param bytesPerSample - The number of bytes per sample.
+ * @param numSamples - The number of samples in the audio buffer.
+ */
+export const audioBufferToWav = (
+  audioBuffer: AudioBuffer,
+  numChannels: number = 1,
+  sampleRate: number = audioBuffer.sampleRate,
+  bytesPerSample: number = 2,
+  numSamples: number = audioBuffer.length,
+): ArrayBuffer => {
   const wavSize = 44 + numSamples * bytesPerSample;
 
   const buffer = new ArrayBuffer(wavSize);
@@ -30,9 +51,15 @@ export const encodeWAV = (audioBuffer: AudioBuffer): Blob => {
     offset += 2;
   }
 
-  return new Blob([buffer], { type: 'audio/wav' });
+  return buffer;
 };
 
+/**
+ * Writes a string to a DataView at a specified offset.
+ * @param view - The DataView to write to.
+ * @param offset - The offset to write the string at.
+ * @param str - The string to write.
+ */
 const writeString = (view: DataView, offset: number, str: string): void => {
   for (let i = 0; i < str.length; i++) {
     view.setUint8(offset + i, str.charCodeAt(i));

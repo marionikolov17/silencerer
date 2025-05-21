@@ -1,4 +1,5 @@
 import { normalizeAudio } from '../utils/normalization';
+import { audioBufferToWav } from '../utils/encoding';
 
 export interface SilenceSegment {
   start: number;
@@ -39,25 +40,25 @@ class Silencer {
   }
 
   /**
-   * Main entry point for the silencer.
+   * Entry point for the silencer.
    * Removes silence from an audio buffer.
    * @param arrayBuffer The audio buffer to remove silence from.
-   * @returns A promise that resolves to the audio buffer with silence removed.
+   * @returns A promise that resolves to the audio buffer with silence removed and converted to a WAV buffer.
    */
-  public async run(arrayBuffer: ArrayBuffer): Promise<AudioBuffer> {
+  public async run(arrayBuffer: ArrayBuffer): Promise<ArrayBuffer> {
     const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
 
     const segments = await this.detectSilenceSegments(arrayBuffer);
 
     const newBuffer = this.removeSilenceSegments(audioBuffer, segments);
 
-    const crossfadedBuffer = this.applyCrossfadeTransitionBetweenSegments(
+    const crossfadedBuffer = await this.applyCrossfadeTransitionBetweenSegments(
       newBuffer,
       segments,
       audioBuffer.sampleRate,
     );
 
-    return crossfadedBuffer;
+    return audioBufferToWav(crossfadedBuffer);
   }
 
   /**

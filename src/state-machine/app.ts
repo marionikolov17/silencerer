@@ -7,10 +7,12 @@ import {
   renameDuplicateFile,
 } from '../utils/files';
 import { Block, BlockType } from '@/types/blocks';
+import Silencer from '@/lib/silencer';
 
 type AppContext = {
   files: File[];
   blocks: Block[];
+  isRemovingSilence: boolean;
 };
 
 type AppEvent =
@@ -18,7 +20,8 @@ type AppEvent =
   | { type: 'event.remove_media'; fileName: string }
   | { type: 'event.rename_media'; fileName: string; newName: string }
   | { type: 'event.load_file'; buffer: ArrayBuffer; file: File }
-  | { type: 'event.delete_block'; blockId: string };
+  | { type: 'event.delete_block'; blockId: string }
+  | { type: 'event.silence_remove' };
 
 const appMachine = setup({
   types: {
@@ -101,6 +104,20 @@ const appMachine = setup({
         };
       },
     ),
+    silenceRemoveActor: fromPromise(
+      async ({ input }: { input: { context: AppContext } }) => {
+        const silencer = new Silencer();
+
+        const blocks = input.context.blocks.slice();
+
+        return Promise.all(
+          blocks.map(async (block) => {
+            const buffer = await silencer.run(block.buffer);
+            return { ...block, buffer };
+          }),
+        );
+      },
+    ),
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QEMAOqB0sAuyB2EARgJ4DEYAbmHthgJYC2qA9gE7YD6DkdyA2gAYAuolAtYdbHWZ5RIAB6IAzACYlGAQDYVAVgA0IYogAsARhUYAnFoGWA7GZWnbxgL6uDaTDnxEylalpWMAZmKi4efmE5cUlpWSQFZVNNK00ADjt9Q0R00wwdd090LFwCEnIqGgxgvGRuCIheQRFE2KkZOUUEDJ0MUztTTOyjBCUBfMt0pRS7JSzpuwE7IpAveiY2KTwoRt5SCBkwejwKZgBrY-XGFnY6Hb3kBHuzgGNkDrwWlpjmCU+usoBH1bPMRogVHYLMYdOMlEpjMYoZodJpVtdNncHtwmshyKxWGwMKgADYfABmbAYGAxt22uxxvGep2Y70+32ibT+cU6iW64xBljBBlGShRGGMWnMdksKksGSy6JKwVCFHuDMiByOJzOlxpypCYXVj2Zbw+8Q5rTE3IBfKBguFOQQphmVks7s0lmM6RUxic6XSSswKqN2M1YAJRNJFKp+uDhrVYdxptZ5pklt+-3igLGwI0QqyIohvqssK0Snl3uMYKDNWo9WNjLxhzwxxeFyuBrqDEbkRTbItwh+XKzvNA3V6-UGwyLCBUtg042WKnSQrMOhUtdqDaT+wjhNYxLJ2EprGp623Pd3T3bA-TQ851tHCXHiAyqR0plRulnKXyZecBFnHdeFN1WPBmAgOA5C8TMeRfJIEAAWk0WcUNrHxylGJ94JzHRPynIZCydOUBAwJQdDyDdTAGARvVrG4tl7XE4NtV8ECRcjzHBMZPQwOw8gEH0v1AgQlC3BNmN4VjsztDiVF-Ow7AwH10jozIbB0JEJO7KTkBksdEMsGj+KInj50sfjUW0CYEW0TQXXcdwgA */
@@ -109,6 +126,7 @@ const appMachine = setup({
   context: {
     files: [],
     blocks: [],
+    isRemovingSilence: false,
   },
   states: {
     standby: {
@@ -127,6 +145,9 @@ const appMachine = setup({
         },
         'event.delete_block': {
           target: 'deleting_block',
+        },
+        'event.silence_remove': {
+          target: 'silence_removing',
         },
       },
     },
@@ -244,6 +265,26 @@ const appMachine = setup({
         },
         onError: {
           target: 'standby',
+        },
+      },
+    },
+    silence_removing: {
+      entry: assign({ isRemovingSilence: true }),
+      invoke: {
+        src: 'silenceRemoveActor',
+        input: ({ context }) => ({ context }),
+        onDone: {
+          target: 'standby',
+          actions: [
+            assign({
+              blocks: ({ event }) => event.output,
+              isRemovingSilence: false,
+            }),
+          ],
+        },
+        onError: {
+          target: 'standby',
+          actions: [assign({ isRemovingSilence: false })],
         },
       },
     },

@@ -46,9 +46,12 @@ class Silencer {
    * @returns A promise that resolves to the audio buffer with silence removed and converted to a WAV buffer.
    */
   public async run(arrayBuffer: ArrayBuffer): Promise<ArrayBuffer> {
-    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+    const audioBuffer = await this.audioContext.decodeAudioData(
+      arrayBuffer.slice(0),
+    );
 
     const segments = await this.detectSilenceSegments(arrayBuffer);
+    console.log('Segments detected:', segments);
 
     const newBuffer = this.removeSilenceSegments(audioBuffer, segments);
 
@@ -71,52 +74,91 @@ class Silencer {
     audioBuffer: AudioBuffer,
     segments: SilenceSegment[],
   ) {
-    const sampleRate = audioBuffer.sampleRate;
-    const numberOfChannels = audioBuffer.numberOfChannels;
-    const segmentBufferLength = this.calculateSegmentsBufferLength(
-      segments,
-      sampleRate,
-    );
+    try {
+      const sampleRate = audioBuffer.sampleRate;
+      const numberOfChannels = audioBuffer.numberOfChannels;
+      const segmentBufferLength = this.calculateSegmentsBufferLength(
+        segments,
+        sampleRate,
+      );
 
-    // Calculate the new buffer length by subtracting silence segments
-    const originalLength = audioBuffer.length;
-    const newLength = originalLength - segmentBufferLength;
+      // Calculate the new buffer length by subtracting silence segments
+      const originalLength = audioBuffer.length;
+      const newLength = originalLength - segmentBufferLength;
 
-    // Create a new audio buffer with the same number of channels
-    const newBuffer = this.audioContext.createBuffer(
-      numberOfChannels,
-      newLength,
-      sampleRate,
-    );
-
-    // Process each channel
-    for (let channel = 0; channel < numberOfChannels; channel++) {
-      const originalData = audioBuffer.getChannelData(channel);
-      const newData = newBuffer.getChannelData(channel);
-
-      let writeIndex = 0;
-      let lastEnd = 0;
-
-      // Copy non-silent segments to the new buffer
-      for (const segment of segments) {
-        const startSample = Math.floor(segment.start * sampleRate);
-        const endSample = Math.floor(segment.end * sampleRate);
-
-        // Copy the audio before this silence segment
-        const segmentLength = startSample - lastEnd;
-        newData.set(originalData.subarray(lastEnd, startSample), writeIndex);
-        writeIndex += segmentLength;
-
-        lastEnd = endSample;
+      // Validate the new length is positive
+      if (newLength <= 0) {
+        throw new Error(
+          'Invalid buffer length after removing silence segments',
+        );
       }
 
-      // Copy any remaining audio after the last silence segment
-      if (lastEnd < originalLength) {
-        newData.set(originalData.subarray(lastEnd), writeIndex);
+      // Create a new audio buffer with the same number of channels
+      const newBuffer = this.audioContext.createBuffer(
+        numberOfChannels,
+        newLength,
+        sampleRate,
+      );
+
+      // Process each channel
+      for (let channel = 0; channel < numberOfChannels; channel++) {
+        const originalData = audioBuffer.getChannelData(channel);
+        const newData = newBuffer.getChannelData(channel);
+
+        let writeIndex = 0;
+        let lastEnd = 0;
+
+        // Copy non-silent segments to the new buffer
+        for (const segment of segments) {
+          const startSample = Math.floor(segment.start * sampleRate);
+          const endSample = Math.floor(segment.end * sampleRate);
+
+          // Validate indices are within bounds
+          if (
+            startSample < 0 ||
+            endSample > originalLength ||
+            startSample > endSample
+          ) {
+            console.warn(
+              `Invalid segment indices: start=${startSample}, end=${endSample}, originalLength=${originalLength}`,
+            );
+            continue;
+          }
+
+          // Copy the audio before this silence segment
+          const segmentLength = startSample - lastEnd;
+
+          // Validate write operation bounds
+          if (writeIndex + segmentLength > newLength) {
+            console.warn(
+              `Write operation would exceed new buffer length: writeIndex=${writeIndex}, segmentLength=${segmentLength}, newLength=${newLength}`,
+            );
+            break;
+          }
+
+          newData.set(originalData.subarray(lastEnd, startSample), writeIndex);
+          writeIndex += segmentLength;
+          lastEnd = endSample;
+        }
+
+        // Copy any remaining audio after the last silence segment
+        if (lastEnd < originalLength) {
+          const remainingLength = originalLength - lastEnd;
+          if (writeIndex + remainingLength <= newLength) {
+            newData.set(originalData.subarray(lastEnd), writeIndex);
+          } else {
+            console.warn(
+              `Remaining audio would exceed new buffer length: writeIndex=${writeIndex}, remainingLength=${remainingLength}, newLength=${newLength}`,
+            );
+          }
+        }
       }
+
+      return newBuffer;
+    } catch (error) {
+      console.error('Error removing silence segments:', error);
+      throw error;
     }
-
-    return newBuffer;
   }
 
   /**
@@ -126,60 +168,69 @@ class Silencer {
    * @returns The segments of silence in the audio buffer.
    */
   private async detectSilenceSegments(arrayBuffer: ArrayBuffer) {
-    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+    try {
+      console.log('Detecting silence segments...');
+      const audioBuffer = await this.audioContext.decodeAudioData(
+        arrayBuffer.slice(0),
+      );
 
-    const sampleRate = audioBuffer.sampleRate;
-    const numberOfChannels = audioBuffer.numberOfChannels;
+      const sampleRate = audioBuffer.sampleRate;
+      const numberOfChannels = audioBuffer.numberOfChannels;
 
-    const frameSize = Math.floor(sampleRate * this.frameTime);
+      const frameSize = Math.floor(sampleRate * this.frameTime);
 
-    const channelSegments = this.createChannelsSegmentsObject(numberOfChannels);
+      const channelSegments =
+        this.createChannelsSegmentsObject(numberOfChannels);
 
-    // Support multi-channel audio
-    for (let channel = 0; channel < numberOfChannels; channel++) {
-      const channelData = normalizeAudio(audioBuffer.getChannelData(channel));
+      // Support multi-channel audio
+      for (let channel = 0; channel < numberOfChannels; channel++) {
+        const channelData = normalizeAudio(audioBuffer.getChannelData(channel));
 
-      const segments: SilenceSegment[] = [];
-      let silentFrames = 0;
-      let startTime = 0;
-      let endTime = 0;
+        const segments: SilenceSegment[] = [];
+        let silentFrames = 0;
+        let startTime = 0;
+        let endTime = 0;
 
-      for (let i = 0; i < channelData.length; i += frameSize) {
-        const frame = channelData.slice(i, i + frameSize);
-        const energy = this.calculateEnergy(frame);
+        for (let i = 0; i < channelData.length; i += frameSize) {
+          const frame = channelData.slice(i, i + frameSize);
+          const energy = this.calculateEnergy(frame);
 
-        if (energy < this.threshold) {
-          if (startTime === 0) {
-            startTime = i / sampleRate;
+          if (energy < this.threshold) {
+            if (startTime === 0) {
+              startTime = i / sampleRate;
+            }
+            silentFrames++;
+          } else {
+            if (endTime === 0) endTime = i / sampleRate;
+            if (silentFrames >= this.minimumSilenceDuration * sampleRate) {
+              segments.push({
+                start: startTime,
+                end: endTime,
+              });
+            }
+            silentFrames = 0;
+            startTime = 0;
+            endTime = 0;
           }
-          silentFrames++;
-        } else {
-          if (endTime === 0) endTime = i / sampleRate;
-          if (silentFrames >= this.minimumSilenceDuration * sampleRate) {
-            segments.push({
-              start: startTime,
-              end: endTime,
-            });
-          }
-          silentFrames = 0;
-          startTime = 0;
-          endTime = 0;
         }
+
+        // When going to the end of the audio, if there is still silence, add a segment
+        if (silentFrames > 0) {
+          segments.push({
+            start: startTime,
+            end: audioBuffer.duration,
+          });
+        }
+
+        // Add the segments to the channel's segments array
+        channelSegments[channel] = segments;
       }
 
-      // When going to the end of the audio, if there is still silence, add a segment
-      if (silentFrames > 0) {
-        segments.push({
-          start: startTime,
-          end: audioBuffer.duration,
-        });
-      }
-
-      // Add the segments to the channel's segments array
-      channelSegments[channel] = segments;
+      return this.mergeChannelsSegments(channelSegments);
+    } catch (error) {
+      console.error('Error detecting silence segments:', error);
+      throw error;
     }
-
-    return this.mergeChannelsSegments(channelSegments);
   }
 
   /**

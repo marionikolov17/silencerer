@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 
 export default function useHandleClickOutside(
-  ref: React.RefObject<HTMLDivElement | null>,
+  ref: React.RefObject<HTMLDivElement | HTMLFormElement | null>,
   callback: () => void,
 ) {
   const handleClickOutside = useCallback(

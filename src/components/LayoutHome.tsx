@@ -6,15 +6,26 @@ import AudioPlayer from './AudioPlayer';
 import Header from './Header';
 import VideoPreview from './VideoPreview';
 import { IoSettingsOutline } from 'react-icons/io5';
+import SilencerSettings from './SilencerSettings';
 
 export default function LayoutHome() {
   const [isMobileMediaOpened, setIsMobileMediaOpened] = useState(false);
+  const [isSettingsOpened, setIsSettingsOpened] = useState(false);
 
   const blocks = AppMachineContext.useSelector((state) => state.context.blocks);
+
+  const openSettings = () => {
+    setIsSettingsOpened(true);
+  };
+
+  const closeSettings = () => {
+    setIsSettingsOpened(false);
+  };
 
   return (
     <PlayerProvider>
       <main className="w-full min-h-screen relative flex flex-col overflow-x-hidden">
+        {isSettingsOpened && <SilencerSettings closeSettings={closeSettings} />}
         <div className="w-full min-h-[450px] lg:h-[700px] bg-gray-100 flex border-b border-gray-200 relative">
           <AddedMedia
             isMobileMediaOpened={isMobileMediaOpened}
@@ -29,6 +40,7 @@ export default function LayoutHome() {
                 <button
                   className="cursor-pointer flex gap-x-1 items-center hover:bg-gray-100 py-1.5 rounded-lg px-2"
                   title="Algorithm Settings"
+                  onClick={openSettings}
                 >
                   <IoSettingsOutline className="text-lg" />
                   <p className="text-sm font-medium">Settings</p>

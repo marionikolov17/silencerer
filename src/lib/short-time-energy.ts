@@ -86,7 +86,7 @@ class ShortTimeEnergyDetector {
         }
 
         // When going to the end of the audio, if there is still silence, add a segment
-        if (silentFrames > 0) {
+        if (silentFrames > 0 && silentFrames * this.frameSize >= this.minimumSilenceDuration * this.sampleRate) {
           segments.push({
             start: startTime,
             end: this.audioBuffer.duration,

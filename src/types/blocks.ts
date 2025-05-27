@@ -1,11 +1,9 @@
-export type Block = {
-  id: string;
-  name: string;
-  type: BlockType;
-  buffer: ArrayBuffer;
-};
+import { z } from 'zod';
 
-export enum BlockType {
-  Image = 'image',
-  Video = 'video',
-}
+export const BlockSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  buffer: z.instanceof(ArrayBuffer),
+});
+
+export type Block = z.infer<typeof BlockSchema>;

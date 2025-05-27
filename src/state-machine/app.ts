@@ -1,12 +1,8 @@
 import { createActorContext } from '@xstate/react';
 import { assign, fromPromise, setup } from 'xstate';
 import { VALID_FILE_TYPES, MAX_FILE_SIZE } from '@/constants/files';
-import {
-  checkIfFileExists,
-  isFileVideo,
-  renameDuplicateFile,
-} from '../utils/files';
-import { Block, BlockType } from '@/types/blocks';
+import { checkIfFileExists, renameDuplicateFile } from '../utils/files';
+import { Block } from '@/types/blocks';
 import Silencer from '@/lib/silencer';
 
 type AppContext = {
@@ -87,7 +83,6 @@ const appMachine = setup({
         return {
           buffer: input.buffer,
           name: input.file.name,
-          type: isFileVideo(input.file) ? BlockType.Video : BlockType.Image,
         };
       },
     ),
@@ -237,7 +232,6 @@ const appMachine = setup({
                 ...context.blocks,
                 {
                   id: crypto.randomUUID(),
-                  type: event.output.type,
                   buffer: event.output.buffer,
                   name: event.output.name,
                 },

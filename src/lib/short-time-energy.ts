@@ -44,7 +44,7 @@ class ShortTimeEnergyDetector {
    */
   public async detectSegments(): Promise<SilenceSegment[]> {
     try {
-      console.log('Detecting silence segments...');
+      console.log('Detecting silence segments...', this.minimumSilenceDuration);
 
       const channelSegments = Channel.createChannelsSegmentsObject(
         this.numberOfChannels,
@@ -72,7 +72,10 @@ class ShortTimeEnergyDetector {
             silentFrames++;
           } else {
             if (endTime === 0) endTime = i / this.sampleRate;
-            if (silentFrames >= this.minimumSilenceDuration * this.sampleRate) {
+            if (
+              silentFrames * this.frameSize >=
+              this.minimumSilenceDuration * this.sampleRate
+            ) {
               segments.push({
                 start: startTime,
                 end: endTime,
@@ -95,6 +98,8 @@ class ShortTimeEnergyDetector {
         // Add the segments to the channel's segments array
         channelSegments[channel] = segments;
       }
+
+      console.log('channelSegments', channelSegments);
 
       return Channel.mergeChannelsSegments(channelSegments);
     } catch (error) {

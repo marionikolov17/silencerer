@@ -87,6 +87,7 @@ export default function SilencerSettings({ closeSettings }: InputProps) {
           type="number"
           value={threshold}
           metric="dB"
+          step={0.01}
           onChange={(e) => setThreshold(Number(e.target.value))}
         />
         <SettingsInputField
@@ -96,6 +97,7 @@ export default function SilencerSettings({ closeSettings }: InputProps) {
           type="number"
           value={minimumSilenceDuration}
           metric="ms"
+          step={10}
           onChange={(e) => setMinimumSilenceDuration(Number(e.target.value))}
         />
         <SettingsInputField
@@ -105,6 +107,7 @@ export default function SilencerSettings({ closeSettings }: InputProps) {
           type="number"
           value={frameTime}
           metric="ms"
+          step={10}
           onChange={(e) => setFrameTime(Number(e.target.value))}
         />
         <SettingsInputField
@@ -114,6 +117,7 @@ export default function SilencerSettings({ closeSettings }: InputProps) {
           type="number"
           value={crossfadeDuration}
           metric="ms"
+          step={10}
           onChange={(e) => setCrossfadeDuration(Number(e.target.value))}
         />
         <button
@@ -141,14 +145,16 @@ function SettingsInputField({
   type,
   value,
   metric,
+  step,
   onChange,
 }: {
   label: string;
   name: string;
   id: string;
   type: string;
-  value: string | number;
+  value: number;
   metric: string;
+  step: number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
@@ -162,6 +168,7 @@ function SettingsInputField({
           id={id}
           type={type}
           value={value}
+          step={step}
           onChange={onChange}
           className="grow outline-none"
         />

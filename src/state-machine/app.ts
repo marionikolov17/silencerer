@@ -4,11 +4,16 @@ import { VALID_FILE_TYPES, MAX_FILE_SIZE } from '@/constants/files';
 import { checkIfFileExists, renameDuplicateFile } from '../utils/files';
 import { Block } from '@/types/blocks';
 import Silencer from '@/lib/silencer';
+import {
+  SilenceDetectionAlgorithm,
+  SilencerParams,
+} from '@/types/silencer-params';
 
 type AppContext = {
   files: File[];
   blocks: Block[];
   isRemovingSilence: boolean;
+  silencerParams: SilencerParams;
 };
 
 type AppEvent =
@@ -101,7 +106,12 @@ const appMachine = setup({
     ),
     silenceRemoveActor: fromPromise(
       async ({ input }: { input: { context: AppContext } }) => {
-        const silencer = new Silencer();
+        const silencer = new Silencer(
+          input.context.silencerParams.threshold,
+          input.context.silencerParams.minimumSilenceDuration,
+          input.context.silencerParams.frameTime,
+          input.context.silencerParams.crossfadeDuration,
+        );
 
         const blocks = input.context.blocks.slice();
 
@@ -122,6 +132,13 @@ const appMachine = setup({
     files: [],
     blocks: [],
     isRemovingSilence: false,
+    silencerParams: {
+      algorithm: SilenceDetectionAlgorithm.STE,
+      threshold: 0.01,
+      minimumSilenceDuration: 0.2,
+      frameTime: 0.02,
+      crossfadeDuration: 0.05,
+    },
   },
   states: {
     standby: {

@@ -22,7 +22,8 @@ type AppEvent =
   | { type: 'event.rename_media'; fileName: string; newName: string }
   | { type: 'event.load_file'; buffer: ArrayBuffer; file: File }
   | { type: 'event.delete_block'; blockId: string }
-  | { type: 'event.silence_remove' };
+  | { type: 'event.silence_remove' }
+  | { type: 'event.update_silencer_params'; silencerParams: SilencerParams };
 
 const appMachine = setup({
   types: {
@@ -123,6 +124,11 @@ const appMachine = setup({
         );
       },
     ),
+    updateSilencerParamsActor: fromPromise(
+      async ({ input }: { input: { silencerParams: SilencerParams } }) => {
+        return { silencerParams: input.silencerParams };
+      },
+    ),
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QEMAOqB0sAuyB2EARgJ4DEYAbmHthgJYC2qA9gE7YD6DkdyA2gAYAuolAtYdbHWZ5RIAB6IAzACYlGAQDYVAVgA0IYogAsARhUYAnFoGWA7GZWnbxgL6uDaTDnxEylalpWMAZmKi4efmE5cUlpWSQFZVNNK00ADjt9Q0R00wwdd090LFwCEnIqGgxgvGRuCIheQRFE2KkZOUUEDJ0MUztTTOyjBCUBfMt0pRS7JSzpuwE7IpAveiY2KTwoRt5SCBkwejwKZgBrY-XGFnY6Hb3kBHuzgGNkDrwWlpjmCU+usoBH1bPMRogVHYLMYdOMlEpjMYoZodJpVtdNncHtwmshyKxWGwMKgADYfABmbAYGAxt22uxxvGep2Y70+32ibT+cU6iW64xBljBBlGShRGGMWnMdksKksGSy6JKwVCFHuDMiByOJzOlxpypCYXVj2Zbw+8Q5rTE3IBfKBguFOQQphmVks7s0lmM6RUxic6XSSswKqN2M1YAJRNJFKp+uDhrVYdxptZ5pklt+-3igLGwI0QqyIohvqssK0Snl3uMYKDNWo9WNjLxhzwxxeFyuBrqDEbkRTbItwh+XKzvNA3V6-UGwyLCBUtg042WKnSQrMOhUtdqDaT+wjhNYxLJ2EprGp623Pd3T3bA-TQ851tHCXHiAyqR0plRulnKXyZecBFnHdeFN1WPBmAgOA5C8TMeRfJIEAAWk0WcUNrHxylGJ94JzHRPynIZCydOUBAwJQdDyDdTAGARvVrG4tl7XE4NtV8ECRcjzHBMZPQwOw8gEH0v1AgQlC3BNmN4VjsztDiVF-Ow7AwH10jozIbB0JEJO7KTkBksdEMsGj+KInj50sfjUW0CYEW0TQXXcdwgA */
@@ -160,6 +166,9 @@ const appMachine = setup({
         },
         'event.silence_remove': {
           target: 'silence_removing',
+        },
+        'event.update_silencer_params': {
+          target: 'updating_silencer_params',
         },
       },
     },
@@ -296,6 +305,28 @@ const appMachine = setup({
         onError: {
           target: 'standby',
           actions: [assign({ isRemovingSilence: false })],
+        },
+      },
+    },
+    updating_silencer_params: {
+      invoke: {
+        src: 'updateSilencerParamsActor',
+        input: ({ event, context }) => {
+          if (event.type === 'event.update_silencer_params') {
+            return { silencerParams: event.silencerParams, context };
+          }
+          throw new Error('Invalid event type for updating silencer params');
+        },
+        onDone: {
+          target: 'standby',
+          actions: [
+            assign({
+              silencerParams: ({ event }) => event.output.silencerParams,
+            }),
+          ],
+        },
+        onError: {
+          target: 'standby',
         },
       },
     },

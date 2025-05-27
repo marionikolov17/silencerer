@@ -22,3 +22,11 @@ export function formatMediaTime(seconds: number, includeFrames = true) {
   if (includeFrames) result += `:${pad(frames)}`;
   return result;
 }
+
+export function convertMsToSeconds(ms: number) {
+  return ms / 1000;
+}
+
+export function convertSecondsToMs(seconds: number) {
+  return seconds * 1000;
+}

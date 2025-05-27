@@ -1,13 +1,37 @@
+'use client';
+
+import { AppMachineContext } from '@/state-machine/app';
 import useHandleClickOutside from '@/hooks/useHandleClickOutside';
 import { SilenceDetectionAlgorithm } from '@/types/silencer-params';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { convertMsToSeconds, convertSecondsToMs } from '@/utils/time';
 
 interface InputProps {
   closeSettings: () => void;
 }
 
 export default function SilencerSettings({ closeSettings }: InputProps) {
+  const silencerParams = AppMachineContext.useSelector(
+    (state) => state.context.silencerParams,
+  );
+
+  const [algorithm, setAlgorithm] = useState<SilenceDetectionAlgorithm>(
+    silencerParams.algorithm,
+  );
+  const [threshold, setThreshold] = useState<number>(silencerParams.threshold);
+  const [minimumSilenceDuration, setMinimumSilenceDuration] = useState<number>(
+    convertSecondsToMs(silencerParams.minimumSilenceDuration),
+  );
+  const [frameTime, setFrameTime] = useState<number>(
+    convertSecondsToMs(silencerParams.frameTime),
+  );
+  const [crossfadeDuration, setCrossfadeDuration] = useState<number>(
+    convertSecondsToMs(silencerParams.crossfadeDuration),
+  );
+
   const formRef = useRef<HTMLFormElement>(null);
+
+  const appMachineActorRef = AppMachineContext.useActorRef();
 
   useHandleClickOutside(formRef, closeSettings);
 
@@ -17,7 +41,17 @@ export default function SilencerSettings({ closeSettings }: InputProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('submit');
+    appMachineActorRef.send({
+      type: 'event.update_silencer_params',
+      silencerParams: {
+        algorithm,
+        threshold,
+        minimumSilenceDuration: convertMsToSeconds(minimumSilenceDuration),
+        frameTime: convertMsToSeconds(frameTime),
+        crossfadeDuration: convertMsToSeconds(crossfadeDuration),
+      },
+    });
+    closeSettings();
   };
 
   return (
@@ -36,6 +70,10 @@ export default function SilencerSettings({ closeSettings }: InputProps) {
             name="algorithm"
             id="algorithm"
             className="grow w-full sm:w-auto border border-gray-200 rounded-lg px-2 py-1 outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-500"
+            value={algorithm}
+            onChange={(e) =>
+              setAlgorithm(e.target.value as SilenceDetectionAlgorithm)
+            }
           >
             <option value={SilenceDetectionAlgorithm.STE}>
               Short Time Energy
@@ -47,36 +85,36 @@ export default function SilencerSettings({ closeSettings }: InputProps) {
           name="threshold"
           id="threshold"
           type="number"
-          value="0.01"
+          value={threshold}
           metric="dB"
-          onChange={() => {}}
+          onChange={(e) => setThreshold(Number(e.target.value))}
         />
         <SettingsInputField
           label="Min Duration"
           name="minimumSilenceDuration"
           id="minimumSilenceDuration"
           type="number"
-          value="200"
+          value={minimumSilenceDuration}
           metric="ms"
-          onChange={() => {}}
+          onChange={(e) => setMinimumSilenceDuration(Number(e.target.value))}
         />
         <SettingsInputField
           label="Frame Time"
           name="frameTime"
           id="frameTime"
           type="number"
-          value="20"
+          value={frameTime}
           metric="ms"
-          onChange={() => {}}
+          onChange={(e) => setFrameTime(Number(e.target.value))}
         />
         <SettingsInputField
           label="Crossfade"
           name="crossfadeDuration"
           id="crossfadeDuration"
           type="number"
-          value="50"
+          value={crossfadeDuration}
           metric="ms"
-          onChange={() => {}}
+          onChange={(e) => setCrossfadeDuration(Number(e.target.value))}
         />
         <button
           type="submit"
@@ -109,7 +147,7 @@ function SettingsInputField({
   name: string;
   id: string;
   type: string;
-  value: string;
+  value: string | number;
   metric: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {

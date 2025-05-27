@@ -51,14 +51,13 @@ class Silencer {
     );
 
     const segments = await this.detectSilenceSegments(arrayBuffer);
-    console.log('Segments detected:', segments);
 
     const newBuffer = this.removeSilenceSegments(audioBuffer, segments);
 
     const crossfadedBuffer = await this.applyCrossfadeTransitionBetweenSegments(
       newBuffer,
       segments,
-      audioBuffer.sampleRate,
+      newBuffer.sampleRate,
     );
 
     return audioBufferToWav(crossfadedBuffer);
@@ -169,7 +168,6 @@ class Silencer {
    */
   private async detectSilenceSegments(arrayBuffer: ArrayBuffer) {
     try {
-      console.log('Detecting silence segments...');
       const audioBuffer = await this.audioContext.decodeAudioData(
         arrayBuffer.slice(0),
       );
@@ -202,35 +200,41 @@ class Silencer {
     segments: SilenceSegment[],
     sampleRate: number,
   ) {
-    const offlineContext = new OfflineAudioContext(
-      audioBuffer.numberOfChannels,
-      audioBuffer.length,
-      sampleRate,
-    );
-
-    const source = offlineContext.createBufferSource();
-    const gainNode = offlineContext.createGain();
-
-    source.buffer = audioBuffer;
-
-    source.connect(gainNode).connect(offlineContext.destination);
-
-    for (const segment of segments) {
-      const startTime = segment.start - this.crossfadeDuration;
-      const endTime = segment.start + this.crossfadeDuration;
-
-      gainNode.gain.setValueAtTime(1, startTime);
-      gainNode.gain.linearRampToValueAtTime(0, segment.start);
-      gainNode.gain.setValueAtTime(0, segment.start);
-      gainNode.gain.linearRampToValueAtTime(
-        1,
-        endTime > audioBuffer.duration ? audioBuffer.duration : endTime,
+    try {
+      const offlineContext = new OfflineAudioContext(
+        audioBuffer.numberOfChannels,
+        audioBuffer.length,
+        sampleRate,
       );
+
+      const source = offlineContext.createBufferSource();
+      const gainNode = offlineContext.createGain();
+
+      source.buffer = audioBuffer;
+
+      source.connect(gainNode).connect(offlineContext.destination);
+
+      for (const segment of segments) {
+        // Ensure startTime is not negative
+        const startTime = Math.max(0, segment.start - this.crossfadeDuration);
+        const endTime = Math.min(
+          audioBuffer.duration,
+          segment.start + this.crossfadeDuration,
+        );
+
+        gainNode.gain.setValueAtTime(1, startTime);
+        gainNode.gain.linearRampToValueAtTime(0, segment.start);
+        gainNode.gain.setValueAtTime(0, segment.start);
+        gainNode.gain.linearRampToValueAtTime(1, endTime);
+      }
+
+      source.start(0);
+
+      return offlineContext.startRendering();
+    } catch (error) {
+      console.error('Error applying crossfade transition:', error);
+      throw error;
     }
-
-    source.start(0);
-
-    return offlineContext.startRendering();
   }
 
   /**

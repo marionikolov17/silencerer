@@ -7,6 +7,7 @@ interface RangeControllerProps {
   min: number;
   max: number;
   value: number;
+  disabled?: boolean;
   updateValue: (value: number) => void;
   className?: string;
   backgroundColorClassName?: string;
@@ -24,6 +25,7 @@ export default function RangeController({
   max,
   value,
   updateValue,
+  disabled = false,
   className = 'w-40',
   backgroundColorClassName = 'bg-gray-200',
   backgroundColor,
@@ -47,6 +49,7 @@ export default function RangeController({
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
     element: HTMLDivElement,
   ) => {
+    if (disabled) return;
     const { left, width } = element.getBoundingClientRect();
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const newLeft = clientX - left;
@@ -139,6 +142,7 @@ export default function RangeController({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
+        title={disabled ? 'Disabled' : ''}
       ></div>
     </div>
   );

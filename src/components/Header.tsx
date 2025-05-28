@@ -1,8 +1,11 @@
 'use client';
 
 import { PiArrowBendUpLeftBold, PiArrowBendUpRightBold } from 'react-icons/pi';
+interface InputProps {
+  openExportWindow: () => void;
+}
 
-export default function Header() {
+export default function Header({ openExportWindow }: InputProps) {
   return (
     <div className="w-full h-16 flex items-center justify-between px-4">
       <div className="flex items-center gap-x-2">
@@ -24,6 +27,7 @@ export default function Header() {
         <button
           className="bg-orange-500 text-white text-sm px-8 py-2 rounded-lg cursor-pointer hover:bg-orange-600 transition-all duration-300"
           title="Export Media"
+          onClick={openExportWindow}
         >
           Export
         </button>

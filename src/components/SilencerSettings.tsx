@@ -122,14 +122,14 @@ export default function SilencerSettings({ closeSettings }: InputProps) {
         />
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white rounded-lg px-4 py-2 mt-4 hover:bg-blue-600 transition-all duration-300 cursor-pointer"
+          className="w-full bg-blue-500 text-white rounded-lg py-2 mt-4 cursor-pointer hover:bg-blue-600 transition-all duration-300"
         >
           Save
         </button>
         <button
           type="button"
           onClick={handleCancel}
-          className="w-full flex items-center justify-center rounded-lg px-4 cursor-pointer"
+          className="w-full bg-gray-200 text-gray-600 rounded-lg py-2 cursor-pointer hover:bg-gray-300 transition-all duration-300"
         >
           Cancel
         </button>

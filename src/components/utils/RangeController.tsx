@@ -115,7 +115,7 @@ export default function RangeController({
         onClick={handleParentClick}
       >
         <div
-          className={cn('h-full', fillColorClassName)}
+          className={cn('h-full', fillColorClassName, disabled && 'bg-gray-300')}
           style={{
             backgroundColor: fillColor || undefined,
             width: `${progress}%`,
@@ -127,6 +127,7 @@ export default function RangeController({
           'absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-4 h-4 border-3 border-blue-500 bg-white cursor-grab select-none',
           pointerBorderColorClassName,
           pointerColorClassName,
+          disabled && 'border-gray-300',
           isDragging && 'cursor-grabbing',
         )}
         style={{

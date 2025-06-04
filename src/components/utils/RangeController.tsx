@@ -94,12 +94,16 @@ export default function RangeController({
 
   // Effects
   useEffect(() => {
-    updateValue(calculateValue(min, max, progress));
-  }, [progress, min, max, updateValue]);
+    if (isDragging) {
+      updateValue(calculateValue(min, max, progress));
+    }
+  }, [progress, min, max, updateValue, isDragging]);
 
   useEffect(() => {
-    setProgress(calculateProgress(min, max, value));
-  }, [value, min, max]);
+    if (!isDragging) {
+      setProgress(calculateProgress(min, max, value));
+    }
+  }, [value, min, max, isDragging]);
 
   return (
     <div
@@ -115,7 +119,11 @@ export default function RangeController({
         onClick={handleParentClick}
       >
         <div
-          className={cn('h-full', fillColorClassName, disabled && 'bg-gray-300')}
+          className={cn(
+            'h-full',
+            fillColorClassName,
+            disabled && 'bg-gray-300',
+          )}
           style={{
             backgroundColor: fillColor || undefined,
             width: `${progress}%`,

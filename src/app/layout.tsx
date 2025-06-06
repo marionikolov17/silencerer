@@ -9,9 +9,47 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Silencerer',
+  title: 'Silencerer - Free Silence Detection and Removal',
   description:
     'Free and Open-Source Audio & Video Silence Detection and Removal',
+  creator: 'Mario Nikolov',
+  keywords: [
+    'silence detection',
+    'silence removal',
+    'silence detection and removal',
+    'silence detection and removal tool',
+    'silence detection and removal software',
+    'silence detection and removal app',
+    'silence detection and removal online',
+    'silence detection and removal free',
+    'silence detection and removal tool free',
+    'silence detection and removal software free',
+    'silence detection and removal app free',
+    'silence detection and removal online free',
+    'silence detection and removal free online',
+  ],
+  icons: {
+    icon: '/favicon.ico',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: 'Silencerer - Free Silence Detection and Removal',
+    siteName: 'Silencerer',
+    description:
+      'Free and Open-Source Audio & Video Silence Detection and Removal',
+    url: 'https://silencerer.com',
+    images: [
+      {
+        url: '/opengraph.png',
+        width: 1200,
+        height: 630,
+        alt: 'Silencerer - Free Silence Detection and Removal',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

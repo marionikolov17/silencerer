@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { CiMenuKebab } from 'react-icons/ci';
 import { FiCheck, FiEdit2 } from 'react-icons/fi';
 import { AppMachineContext } from '@/state-machine/app';
@@ -11,6 +11,7 @@ import {
 } from 'react-icons/pi';
 import { cn } from '@/utils/cn';
 import { isFileVideo } from '@/utils/files';
+import { GoPlus } from 'react-icons/go';
 
 export default function AddedMediaItem({ file }: { file: File }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,6 +19,13 @@ export default function AddedMediaItem({ file }: { file: File }) {
   const [name, setName] = useState(file.name);
   const [screenWidth, setScreenWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const displayFileName = useMemo(() => {
+    if (file.name.length > 40) {
+      return file.name.slice(0, 38) + '...';
+    }
+    return file.name;
+  }, [file.name]);
 
   const appMachineActorRef = AppMachineContext.useActorRef();
 
@@ -134,8 +142,15 @@ export default function AddedMediaItem({ file }: { file: File }) {
             />
           )}
           <div className="grow overflow-hidden">
-            <p className="text-base grow ms-2">{file.name}</p>
+            <p className="text-base grow ms-2">{displayFileName}</p>
           </div>
+          <button
+            className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300"
+            title="Load File"
+            onClick={handleLoadFile}
+          >
+            <GoPlus className="text-xl" />
+          </button>
           <button
             className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300"
             title="Options"
